@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { languages } from "@/constants/languages";
+import { Volume2, VolumeX } from "lucide-react";
 
 type TranslatorPanelProps = {
   sentences: string[];
@@ -30,6 +31,7 @@ const TranslatorPanel = ({
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [items, setItems] = useState<TranslationItem[]>([]);
   const [stickToBottom, setStickToBottom] = useState(true);
+  const [isMeetingMuted, setIsMeetingMuted] = useState(false);
   const queueRef = useRef<string[]>([]);
   const processingRef = useRef(false);
   const lastIndexRef = useRef(0);
@@ -168,6 +170,21 @@ const TranslatorPanel = ({
     listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [items.length, stickToBottom]);
 
+  useEffect(() => {
+    const syncMute = () => {
+      const media = document.querySelectorAll("audio, video");
+      media.forEach((m) => {
+        if (m === audioRef.current) return;
+        (m as HTMLMediaElement).muted = isMeetingMuted;
+      });
+    };
+
+    syncMute();
+    const obs = new MutationObserver(syncMute);
+    obs.observe(document.body, { childList: true, subtree: true });
+    return () => obs.disconnect();
+  }, [isMeetingMuted]);
+
   const handleListScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const threshold = 24;
@@ -224,8 +241,20 @@ const TranslatorPanel = ({
         </button>
         <button
           type="button"
+          onClick={() => setIsMeetingMuted((prev) => !prev)}
+          className={`inline-flex items-center justify-center rounded-md border p-2 transition ${
+            isMeetingMuted
+              ? "border-red-400 bg-red-500/20 text-red-200"
+              : "border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10"
+          }`}
+          title={isMeetingMuted ? "Unmute meeting audio" : "Mute meeting audio (Focus on translation)"}
+        >
+          {isMeetingMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+        </button>
+        <button
+          type="button"
           onClick={handleClear}
-          className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-light text-white/70 transition hover:border-white/20 hover:bg-white/10"
+          className="ml-auto inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-light text-white/70 transition hover:border-white/20 hover:bg-white/10"
         >
           Clear
         </button>
