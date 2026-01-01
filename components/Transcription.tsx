@@ -229,8 +229,7 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }:
   return (
     <div className="fixed bottom-[100px] left-0 w-full flex justify-center pointer-events-none z-50 px-4">
         <div 
-          className="text-yellow-300 text-3xl font-bold text-center drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/40 px-6 py-4 rounded-xl backdrop-blur-sm transition-all duration-100"
-          style={{ textShadow: "2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000" }}
+          className="videoke-caption text-yellow-300 text-3xl font-bold text-center drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/40 px-6 py-4 rounded-xl backdrop-blur-sm transition-all duration-100"
         >
             {transcriptDisplay}
         </div>

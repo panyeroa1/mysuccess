@@ -1,35 +1,31 @@
-Task ID: T-0018
-Title: Audio Source Selection
+Task ID: T-0019
+Title: Refactor Inline Styles
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 21:30
-Last updated: 2026-01-01 21:33
+Created: 2026-01-01 21:35
+Last updated: 2026-01-01 21:37
 
 START LOG
 
-Timestamp: 2026-01-01 21:30
+Timestamp: 2026-01-01 21:35
 Current behavior or state:
 
-- Transcription only uses default microphone.
-- No way to transcribe system audio or both.
+- IDE warning about inline styles in `Transcription.tsx` for the text shadow.
 
 Plan and scope for this task:
 
-- Update `MeetingRoom.tsx` to replace Caption toggle with Dropdown (Mic, System, Both, Off).
-- Update `Transcription.tsx` to implement stream mixing.
-    - `system`: `getDisplayMedia` audio track.
-    - `both`: `AudioContext` mixing of `getUserMedia` and `getDisplayMedia`.
+- Move the complex `text-shadow` style to `app/globals.css` as `.videoke-caption`.
+- Update `Transcription.tsx` to use this class.
 
 Files or modules expected to change:
 
+- app/globals.css
 - components/Transcription.tsx
-- components/MeetingRoom.tsx
 
 Risks or things to watch out for:
 
-- `getDisplayMedia` requires user interaction and permission.
-- AudioContext mixing adds complexity to cleanup; ensures contexts are closed.
+- None.
 
 WORK CHECKLIST
 
@@ -41,21 +37,21 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 21:33
+Timestamp: 2026-01-01 21:37
 Summary of what actually changed:
 
-- `MeetingRoom.tsx`: Added `audioSource` state and Dropdown UI for selecting "Microphone", "System Audio", "Both".
-- `Transcription.tsx`: Implemented `getAudioStream` which handles stream acquisition and mixing via `AudioContext`. Updated cleanup logic (`stopDeepgram`) to close contexts and stop mixed tracks.
+- Added `.videoke-caption` to `app/globals.css`.
+- Removed inline style from `Transcription.tsx` and applied the class.
 
 Files actually modified:
 
+- app/globals.css
 - components/Transcription.tsx
-- components/MeetingRoom.tsx
 
 How it was tested:
 
-- Code review of audio logic.
-- Push to build.
+- Code review.
+- Build test (push to main).
 
 Test result:
 
@@ -63,4 +59,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- "System Audio" relies on the user checking the "Share Audio" checkbox in the browser sharing dialog.
+- None
