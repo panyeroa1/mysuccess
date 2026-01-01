@@ -153,14 +153,24 @@ const Transcription = ({
         }
 
         const constraints: MediaStreamConstraints = {
-          audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+          audio: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
         };
         return await navigator.mediaDevices.getUserMedia(constraints);
       }
 
       if (audioSource === "microphone") {
         const constraints: MediaStreamConstraints = {
-          audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+          audio: {
+            deviceId: deviceId ? { exact: deviceId } : undefined,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
         };
         return await navigator.mediaDevices.getUserMedia(constraints);
       } 
@@ -185,7 +195,12 @@ const Transcription = ({
 
       if (audioSource === "both") {
          const constraints: MediaStreamConstraints = {
-            audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+            audio: {
+              deviceId: deviceId ? { exact: deviceId } : undefined,
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+            },
          };
          const micStream = await navigator.mediaDevices.getUserMedia(constraints);
          
@@ -511,9 +526,20 @@ const Transcription = ({
 
   if (!transcriptDisplay) return null;
 
+  const hasEmphasis = transcriptDisplay.includes("!") || transcriptDisplay.toUpperCase() === transcriptDisplay && transcriptDisplay.length > 5;
+  const isQuestion = transcriptDisplay.includes("?");
+
   return (
     <div className="fixed bottom-20 left-0 z-[100] flex w-full justify-center px-3 pointer-events-none sm:bottom-[110px] sm:px-4">
-      <div className="videoke-caption max-w-[95vw] rounded-md bg-black/60 px-3 py-2 text-left text-[14px] font-light leading-snug text-yellow-300 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-100 sm:max-w-5xl">
+      <div 
+        className={`videoke-caption max-w-[95vw] rounded-md px-3 py-2 text-left text-[14px] leading-snug drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-300 sm:max-w-5xl ${
+          hasEmphasis 
+            ? "bg-red-600/80 text-white font-bold scale-110 animate-pulse" 
+            : isQuestion
+            ? "bg-blue-600/80 text-white font-medium italic"
+            : "bg-black/60 text-yellow-300 font-light"
+        }`}
+      >
         {transcriptDisplay}
       </div>
     </div>
