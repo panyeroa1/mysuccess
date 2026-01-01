@@ -24,14 +24,39 @@
 .str-video__paginated-grid-layout {
   height: 100%;
   width: 100%;
+  min-height: 0;
+}
+
+.str-video__speaker-layout {
+  padding: 0;
+  gap: 0;
+  min-height: 0;
+}
+
+.str-video__paginated-grid-layout {
+  align-items: stretch;
+}
+
+.str-video__paginated-grid-layout .str-video__paginated-grid-layout__group {
+  max-width: none;
+  padding-inline: 0;
+  margin: 0;
+  height: 100%;
 }
 
 .str-video__video {
-  object-fit: contain !important;
+  object-fit: cover;
 }
 
 .str-video__speaker-layout .str-video__participant-view {
   aspect-ratio: auto;
+  height: 100%;
+  width: 100%;
+}
+
+.str-video__paginated-grid-layout
+  .str-video__paginated-grid-layout__group.str-video__paginated-grid-layout--one
+  .str-video__participant-view {
   height: 100%;
   width: 100%;
 }

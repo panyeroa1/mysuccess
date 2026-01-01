@@ -35,7 +35,7 @@ const MeetingPage = () => {
     return <Toast title="You are not allowed to join this meeting" />;
 
   return (
-    <main className="h-screen w-full">
+    <main className="h-[100svh] w-full min-h-[100svh]">
       <StreamCall call={call}>
         <StreamTheme>
           {!isSetupComplete ? (
