@@ -1,28 +1,25 @@
-Task ID: T-0020
-Title: Fix Transcription Visibility & Audio Source Update
+Task ID: T-0021
+Title: Fix CSS Warnings
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 21:50
-Last updated: 2026-01-01 21:52
+Created: 2026-01-01 22:00
+Last updated: 2026-01-01 22:02
 
 START LOG
 
-Timestamp: 2026-01-01 21:50
+Timestamp: 2026-01-01 22:00
 Current behavior or state:
 
-- User reports transcription "no longer seen".
-- `audioSource` prop changes were not triggering a restart of `startDeepgram`.
-- Z-index might have been too low (`z-50`) compared to new UI elements (`z-20` but complex stacking).
+- CSS warnings for property ordering (`backdrop-filter`).
 
 Plan and scope for this task:
 
-- Update `Translation.tsx` `useEffect` to depend on `[deviceId, audioSource]`.
-- Increase `z-index` to `z-[100]`.
+- Reorder `backdrop-filter` and `-webkit-backdrop-filter` in `globals.css`.
 
 Files or modules expected to change:
 
-- components/Transcription.tsx
+- app/globals.css
 
 Risks or things to watch out for:
 
@@ -38,20 +35,19 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 21:52
+Timestamp: 2026-01-01 22:02
 Summary of what actually changed:
 
-- Merged `useEffect` hooks in `Transcription.tsx` to handle `audioSource` and `deviceId` changes correctly (triggering `stopDeepgram` then `startDeepgram`).
-- Increased container `z-index` to `100`.
+- Swapped the order of backdrop filter properties.
 
 Files actually modified:
 
-- components/Transcription.tsx
+- app/globals.css
 
 How it was tested:
 
 - Code review.
-- Push to build.
+- Build test (push to main).
 
 Test result:
 

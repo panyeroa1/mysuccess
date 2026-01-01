@@ -15,7 +15,13 @@
 }
 
 .str-video__speaker-layout__wrapper {
-  max-height: 700px;
+  height: 100%;
+  max-height: none;
+}
+
+.str-video__paginated-grid-layout__wrapper,
+.str-video__paginated-grid-layout {
+  height: 100%;
 }
 
 .str-video__participant-details {
@@ -31,26 +37,79 @@
 }
 
 .str-video__participant-list {
-  background-color: #1c1f2e;
-  padding: 10px;
-  border-radius: 10px;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
   color: white;
   height: 100%;
 }
 
+.str-video__call-controls {
+  gap: 12px;
+}
+
 .str-video__call-controls__button {
-  height: 40px;
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  background-color: #1b2430;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.str-video__call-controls__button:hover {
+  background-color: #243244;
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.str-video__call-controls__button--variant-active,
+.str-video__call-controls__button--enabled {
+  background-color: #1f2a3a;
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.35);
+}
+
+.str-video__call-controls__button--variant-danger {
+  background-color: #3b1c24;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.str-video__call-controls__button--variant-danger:hover {
+  background-color: #4a222c;
+}
+
+.str-video__call-controls__button--variant-success {
+  background-color: #0f2a22;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.str-video__menu-toggle-button {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  background-color: #1b2430;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.str-video__menu-toggle-button:hover {
+  background-color: #243244;
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
 .glassmorphism {
   background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 .glassmorphism2 {
   background: rgba(18, 17, 17, 0.25);
-  backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 /* ==== clerk class override ===== */
@@ -93,21 +152,19 @@
 /* animation */
 
 .show-block {
-  width: 100%;
-  max-width: 350px;
   display: block;
-  animation: show 0.7s forwards linear;
+  animation: show 0.25s ease-out forwards;
 }
 
 @keyframes show {
   0% {
-    animation-timing-function: ease-in;
-    width: 0%;
+    opacity: 0;
+    transform: translateX(12px);
   }
 
   100% {
-    animation-timing-function: ease-in;
-    width: 100%;
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
