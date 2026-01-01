@@ -49,9 +49,11 @@ const MeetingRoom = () => {
     useLocalParticipant,
     useRemoteParticipants,
     useScreenShareState,
+    useHasOngoingScreenShare,
   } = useCallStateHooks();
   const { selectedDevice } = useMicrophoneState();
   const { status: screenShareStatus } = useScreenShareState();
+  const hasScreenShare = useHasOngoingScreenShare();
   const localParticipant = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants() ?? [];
   const activeSpeaker =
@@ -145,6 +147,13 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
   if (callingState !== CallingState.JOINED) return <Loader />;
 
   const CallLayout = () => {
+    const participantsBarPosition =
+      layout === "speaker-right" ? "left" : "right";
+
+    if (hasScreenShare) {
+      return <SpeakerLayout participantsBarPosition={participantsBarPosition} />;
+    }
+
     switch (layout) {
       case "grid":
         return <PaginatedGridLayout />;
