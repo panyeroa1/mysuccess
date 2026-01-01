@@ -2,7 +2,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-import {
   CallControls,
   CallParticipantsList,
   CallStatsButton,
@@ -11,6 +10,7 @@ import {
   SpeakerLayout,
   useCallStateHooks,
   useCall,
+  useLocalParticipant,
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { languages } from "@/constants/languages";

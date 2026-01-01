@@ -1,24 +1,22 @@
-Task ID: T-0023
-Title: Implementation of Translator Sidebar (Eburon Classroom)
+Task ID: T-0024
+Title: Fix Syntax Errors in MeetingRoom.tsx
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:30
-Last updated: 2026-01-01 22:33
+Created: 2026-01-01 22:40
+Last updated: 2026-01-01 22:42
 
 START LOG
 
-Timestamp: 2026-01-01 22:30
+Timestamp: 2026-01-01 22:40
 Current behavior or state:
 
-- No in-app translation/videoke tool integration.
-- User requested embedding `https://eburon.ai/classroom/`.
+- Syntax error in `MeetingRoom.tsx` (duplicate `import {`).
 
 Plan and scope for this task:
 
-- Add sidebar with iframe to `MeetingRoom.tsx`.
-- Add toggle button (Globe).
-- Ensure it toggles exclusively with Participants list.
+- Remove duplicate import line.
+- Restore missing `useLocalParticipant` import.
 
 Files or modules expected to change:
 
@@ -26,7 +24,7 @@ Files or modules expected to change:
 
 Risks or things to watch out for:
 
-- Iframe permissions (autoplay, mic, camera) must be explicit.
+- None.
 
 WORK CHECKLIST
 
@@ -38,12 +36,11 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 22:33
+Timestamp: 2026-01-01 22:42
 Summary of what actually changed:
 
-- Added `showTranslator` state and Globe icon button.
-- Implemented right-side sidebar showing `https://eburon.ai/classroom/`.
-- Configured toggles to close one sidebar when opening the other.
+- Fixed malformed import block.
+- Re-added `useLocalParticipant`.
 
 Files actually modified:
 
@@ -52,7 +49,7 @@ Files actually modified:
 How it was tested:
 
 - Code review.
-- Push to build.
+- Build test (push to main).
 
 Test result:
 
