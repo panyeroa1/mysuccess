@@ -1,27 +1,28 @@
-Task ID: T-0035
-Title: Sticky Footer and Auto-Hide Controls
+Task ID: T-0036
+Title: Full Width Fix and Transcription Debugging
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-02 00:25
-Last updated: 2026-01-02 00:27
+Created: 2026-01-02 00:35
+Last updated: 2026-01-02 00:37
 
 START LOG
 
-Timestamp: 2026-01-02 00:25
+Timestamp: 2026-01-02 00:35
 Current behavior or state:
 
-- Controls floating at bottom.
-- Always visible.
+- Video container has margins/borders ("ugly").
+- Transcription reportedly "not working".
 
 Plan and scope for this task:
 
-- Convert to sticky footer.
-- Add 10s auto-hide.
+- Remove all layout constraints (borders, padding, radius) for 100% width.
+- Add error logging to `Transcription.tsx`.
 
 Files or modules expected to change:
 
 - components/MeetingRoom.tsx
+- components/Transcription.tsx
 
 Risks or things to watch out for:
 
@@ -37,15 +38,16 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-02 00:27
+Timestamp: 2026-01-02 00:37
 Summary of what actually changed:
 
-- Implemented full-width sticky footer.
-- Added 10s inactivity auto-hide.
+- Removed layout artifacts for edge-to-edge view.
+- Added connection error logs.
 
 Files actually modified:
 
 - components/MeetingRoom.tsx
+- components/Transcription.tsx
 
 How it was tested:
 
@@ -58,4 +60,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- None
+- Transcription failure might be API related; logging will confirm.

@@ -51,9 +51,9 @@ const MeetingRoom = () => {
     useScreenShareState,
   } = useCallStateHooks();
   const { selectedDevice } = useMicrophoneState();
-  const { status: screenShareStatus, mediaStream: screenShareStream } = useScreenShareState();
+  const { status: screenShareStatus } = useScreenShareState();
   const localParticipant = useLocalParticipant();
-  const remoteParticipants = useRemoteParticipants();
+  const remoteParticipants = useRemoteParticipants() ?? [];
   const activeSpeaker =
     remoteParticipants.find((participant) => participant.isSpeaking) ??
     remoteParticipants[0];
@@ -85,6 +85,9 @@ const MeetingRoom = () => {
     window.addEventListener("mousemove", resetTimer);
     window.addEventListener("click", resetTimer);
     window.addEventListener("keydown", resetTimer);
+    window.addEventListener("touchstart", resetTimer, { passive: true });
+    window.addEventListener("touchmove", resetTimer, { passive: true });
+    window.addEventListener("pointermove", resetTimer);
 
     // Initialize timer
     resetTimer();
@@ -93,6 +96,9 @@ const MeetingRoom = () => {
       window.removeEventListener("mousemove", resetTimer);
       window.removeEventListener("click", resetTimer);
       window.removeEventListener("keydown", resetTimer);
+      window.removeEventListener("touchstart", resetTimer);
+      window.removeEventListener("touchmove", resetTimer);
+      window.removeEventListener("pointermove", resetTimer);
       clearTimeout(timeoutId);
     };
   }, []);
@@ -153,10 +159,17 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
     <section className="relative h-[100svh] w-full overflow-hidden bg-[#0b0f14] text-white min-h-[100svh]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(99,102,241,0.12),_transparent_40%)]" />
       <div className="relative flex size-full">
-        {/* Added padding pb-24 to prevent control bar overlap */}
-        <div className="relative flex size-full items-center justify-center pb-24">
-          <div className="relative size-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f141c]/80 shadow-[0_24px_70px_rgba(0,0,0,0.55)]">
-            <CallLayout />
+      <div className="relative flex size-full">
+        {/* Full width, no padding, no border for edge-to-edge experience */}
+        <div className="relative flex size-full items-center justify-center bg-black">
+          <div className="relative size-full overflow-hidden bg-[#0f141c]">
+            {layout === "grid" ? (
+              <PaginatedGridLayout />
+            ) : layout === "speaker-right" ? (
+              <SpeakerLayout participantsBarPosition="left" />
+            ) : (
+              <SpeakerLayout participantsBarPosition="right" />
+            )}
           </div>
         </div>
         <div
@@ -207,7 +220,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
       {/* video layout and call controls */}
       <div 
         className={cn(
-            "fixed bottom-0 left-0 z-50 flex h-[55px] w-full items-center justify-center gap-3 border-t border-white/10 bg-[#0f141c] px-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-transform duration-300",
+            "fixed bottom-0 left-0 z-50 flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto border-t border-white/10 bg-[#0f141c] px-2 pb-[6px] pt-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-transform duration-300 sm:min-h-[64px] sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible sm:px-4 sm:pb-3 sm:pt-3",
             !showControls && "translate-y-full"
         )}
       >

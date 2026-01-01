@@ -205,6 +205,11 @@ const Transcription = ({
 
     } catch (error) {
       console.error("Failed to start Deepgram", error);
+      // Feedback to user
+      const msg = error instanceof Error ? error.message : "Connection failed";
+      // We can't use toast here easily without importing it or passing it in.
+      // Ideally we pass toast as prop or use console.
+      console.warn("Transcription Check: Deepgram failed to start.", msg);
     }
   };
 
@@ -266,12 +271,10 @@ const Transcription = ({
   if (!transcriptDisplay) return null;
 
   return (
-    <div className="fixed bottom-[110px] left-0 w-full flex justify-center pointer-events-none z-[100] px-4">
-        <div 
-          className="videoke-caption w-full max-w-5xl text-yellow-300 text-3xl font-bold text-left drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/60 px-6 py-4 rounded-xl backdrop-blur-md transition-all duration-100"
-        >
-            {transcriptDisplay}
-        </div>
+    <div className="fixed bottom-20 left-0 z-[100] flex w-full justify-center px-3 pointer-events-none sm:bottom-[110px] sm:px-4">
+      <div className="videoke-caption max-w-[95vw] rounded-lg bg-black/60 px-3 py-2 text-left text-lg font-semibold leading-snug text-yellow-300 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-100 sm:max-w-5xl sm:rounded-xl sm:px-6 sm:py-4 sm:text-3xl">
+        {transcriptDisplay}
+      </div>
     </div>
   );
 };
