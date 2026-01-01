@@ -139,11 +139,23 @@ const Transcription = ({ userId, meetingId, deviceId }: TranscriptionProps) => {
   };
 
   useEffect(() => {
-    // Cleanup on unmount
+    // If deviceId changes and we are listening, we should optionally restart
+    // For now, let's just cleanup on unmount
     return () => {
       stopDeepgram();
     };
   }, []);
+
+  // Effect to handle device switching if already listening
+  useEffect(() => {
+    if (isListening && deviceId) {
+        console.log("Device changed to", deviceId, "restarting transcription...");
+        stopDeepgram();
+        // Give a bit of time for cleanup then restart
+        setTimeout(() => startDeepgram(), 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceId]);
 
   return (
     <div className="fixed bottom-20 left-4 z-50 bg-dark-1 p-3 rounded-lg text-white opacity-90 shadow-lg border border-gray-700">

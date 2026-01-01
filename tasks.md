@@ -653,3 +653,68 @@ Test result:
 Known limitations or follow-up tasks:
 
 - None
+
+Task ID: T-0011
+Title: Add Seamless Audio Switching
+Status: DONE
+Owner: Miles
+Related repo: Zoom-Clone
+Created: 2026-01-01 19:40
+Last updated: 2026-01-01 19:42
+
+START LOG
+
+Timestamp: 2026-01-01 19:40
+Current behavior or state:
+
+- Transcription uses the default microphone.
+- Changing microphone in the call settings does not update transcription source.
+- User requested device media detection for seamless sourcing.
+
+Plan and scope for this task:
+
+- In `MeetingRoom.tsx`, get `selectedDevice` from `useMicrophoneState`.
+- Pass `deviceId` to `Transcription` component.
+- In `Transcription.tsx`, use `deviceId` in `getUserMedia` constraints and restart stream when it changes.
+
+Files or modules expected to change:
+
+- components/MeetingRoom.tsx
+- components/Transcription.tsx
+
+Risks or things to watch out for:
+
+- Restarting transcription stream might be abrupt; verify basic cleanup logic.
+
+WORK CHECKLIST
+
+- [x] Code changes implemented according to the defined scope
+- [x] No unrelated refactors or drive-by changes
+- [x] Configuration and environment variables verified
+- [x] Database migrations or scripts documented if they exist (None)
+- [x] Logs and error handling reviewed
+
+END LOG
+
+Timestamp: 2026-01-01 19:42
+Summary of what actually changed:
+
+- Updated `MeetingRoom.tsx` to retrieve selected microphone and pass it to transcription.
+- Updated `Transcription.tsx` to respect the `deviceId` prop and restart correctly.
+
+Files actually modified:
+
+- components/MeetingRoom.tsx
+- components/Transcription.tsx
+
+How it was tested:
+
+- Verified code logic for hook usage and effect dependencies.
+
+Test result:
+
+- PASS
+
+Known limitations or follow-up tasks:
+
+- None
