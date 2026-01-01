@@ -68,18 +68,23 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
            
            if (data.is_final) {
              let translated = text;
-             if (targetLang && targetLang !== "en") { 
+             let detectedLang = "en";
+
+             // Detect language of the source text
+             detectedLang = await detectLanguage(text);
+
+             if (targetLang && targetLang !== detectedLang) { 
                 const tx = await translateText(text, targetLang);
                 if (tx) translated = tx;
              }
              
              // Keep only the last ~100 characters for the "single line" feel
              setTranscriptDisplay((prev) => {
-                 const newText = prev + " " + (targetLang && targetLang !== "en" ? translated : text);
+                 const newText = prev + " " + (targetLang && targetLang !== detectedLang ? translated : text);
                  return newText.slice(-100); 
              });
              
-             await saveTranscript(text, translated);
+             await saveTranscript(text, translated, detectedLang);
            } else {
              // Optional: Show interim results for smoother "streaming" feel
              // setTranscriptDisplay((prev) => (prev + " " + text).slice(-100));

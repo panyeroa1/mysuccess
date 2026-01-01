@@ -34,3 +34,30 @@ export const translateText = async (text: string, targetLang: string) => {
     return null;
   }
 };
+
+export const detectLanguage = async (text: string) => {
+  if (!text || text.trim().length === 0) return "en";
+
+  try {
+    const response = await ollama.chat({
+      model: "gpt-oss:120b",
+      messages: [
+        {
+          role: "system",
+          content: `Identify the language of the following text. Return ONLY the ISO 639-1 language code (e.g. en, es, fr, zh). Do not return any other text.`,
+        },
+        {
+          role: "user",
+          content: text,
+        },
+      ],
+      stream: false,
+    });
+
+    const langCode = response.message.content?.trim().substring(0, 2).toLowerCase();
+    return langCode || "en";
+  } catch (error) {
+    console.error("Language detection error:", error);
+    return "en";
+  }
+};
