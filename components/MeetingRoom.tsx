@@ -43,13 +43,13 @@ const MeetingRoom = () => {
   const [targetLang, setTargetLang] = useState("en");
   const { useCallCallingState, useMicrophoneState, useLocalParticipant, useScreenShareState } = useCallStateHooks();
   const { selectedDevice } = useMicrophoneState();
-  const { isScreenSharing, screenShareAudioStream: myScreenShareAudioStream } = useScreenShareState();
+  const { status: screenShareStatus, mediaStream: screenShareStream } = useScreenShareState();
   const { user } = useUser();
   const call = useCall();
   
   const localParticipant = useLocalParticipant();
-  const amISharing = isScreenSharing;
-  const screenShareAudioStream = myScreenShareAudioStream;
+  const amISharing = screenShareStatus === "enabled";
+  const screenShareAudioStream = screenShareStream;
 
   // Auto-switch to "both" when screen sharing is active to capture system audio
   useEffect(() => {

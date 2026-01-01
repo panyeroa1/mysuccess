@@ -1,21 +1,22 @@
-Task ID: T-0026
-Title: Fix Screen Share State Detection
+Task ID: T-0027
+Title: Fix useScreenShareState Return Type Usage
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:55
-Last updated: 2026-01-01 22:57
+Created: 2026-01-01 22:58
+Last updated: 2026-01-01 23:00
 
 START LOG
 
-Timestamp: 2026-01-01 22:55
+Timestamp: 2026-01-01 22:58
 Current behavior or state:
 
-- Type error: `isScreenSharing` not found on `StreamVideoParticipant`.
+- Type error: `isScreenSharing` property does not exist.
 
 Plan and scope for this task:
 
-- Use `useScreenShareState` hook to get sharing status and stream.
+- Destructure `status` and `mediaStream` from `useScreenShareState`.
+- Derive computed properties.
 
 Files or modules expected to change:
 
@@ -35,10 +36,10 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 22:57
+Timestamp: 2026-01-01 23:00
 Summary of what actually changed:
 
-- Replaced direct property access with `useScreenShareState` hook.
+- Updated destructuring of `useScreenShareState`.
 
 Files actually modified:
 
