@@ -14,8 +14,7 @@ interface TranscriptionProps {
 }
 
 const Transcription = ({ userId, meetingId, deviceId, targetLang }: TranscriptionProps) => {
-  const [isListening, setIsListening] = useState(false);
-  const [transcriptDisplay, setTranscriptDisplay] = useState("Initializing...");
+  const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
 
@@ -27,8 +26,6 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
         return;
       }
 
-      setTranscriptDisplay("Requesting microphone...");
-      
       const constraints: MediaStreamConstraints = {
         audio: deviceId ? { deviceId: { exact: deviceId } } : true,
       };
@@ -37,7 +34,6 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
       
       if (!MediaRecorder.isTypeSupported("audio/webm")) {
         console.warn("Browser does not support audio/webm");
-        // Fallback or error handling
       }
 
       const microphone = new MediaRecorder(stream, { mimeType: "audio/webm" });
@@ -55,21 +51,16 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
       deepgramRef.current = connection;
 
       connection.on(LiveTranscriptionEvents.Open, () => {
-        console.log("Deepgram connection open");
-        setTranscriptDisplay("Listening...");
-        setIsListening(true);
-
         microphone.addEventListener("dataavailable", (event) => {
           if (event.data.size > 0 && connection.getReadyState() === 1) {
             connection.send(event.data);
           }
         });
 
-        microphone.start(250); // Send distinct chunks every 250ms
+        microphone.start(250);
       });
 
       connection.on(LiveTranscriptionEvents.Transcript, async (data) => {
-        // Handle transcript
         const alternative = data.channel.alternatives[0];
         if (alternative && alternative.transcript) {
            const text = alternative.transcript;
@@ -81,53 +72,49 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
                 if (tx) translated = tx;
              }
              
-             setTranscriptDisplay((prev) => (prev + " " + text + ` (${translated})`).slice(-200));
+             // Keep only the last ~100 characters for the "single line" feel
+             setTranscriptDisplay((prev) => {
+                 const newText = prev + " " + (targetLang && targetLang !== "en" ? translated : text);
+                 return newText.slice(-100); 
+             });
+             
              await saveTranscript(text, translated);
            } else {
-             // For UI feedback, show interim
+             // Optional: Show interim results for smoother "streaming" feel
+             // setTranscriptDisplay((prev) => (prev + " " + text).slice(-100));
            }
         }
       });
 
       connection.on(LiveTranscriptionEvents.Close, () => {
-        console.log("Deepgram connection closed");
-        setIsListening(false);
-        setTranscriptDisplay("Connection closed.");
+        // console.log("Deepgram connection closed");
       });
 
       connection.on(LiveTranscriptionEvents.Error, (err) => {
         console.error("Deepgram error", err);
-        setTranscriptDisplay("Error occurred.");
-        setIsListening(false);
       });
 
     } catch (error) {
       console.error("Failed to start Deepgram", error);
-      setTranscriptDisplay("Failed to start.");
-      setIsListening(false);
     }
   };
 
   const stopDeepgram = () => {
     if (microphoneRef.current && microphoneRef.current.state !== "inactive") {
-      microphoneRef.current.stop(); // This will stop recording
-      // Also stop the tracks to release the mic
+      microphoneRef.current.stop();
       microphoneRef.current.stream.getTracks().forEach(track => track.stop());
     }
     if (deepgramRef.current) {
-        // Finish sending?
         deepgramRef.current.finish(); 
         deepgramRef.current = null;
     }
-    setIsListening(false);
-    setTranscriptDisplay("Stopped.");
   };
 
   const saveTranscript = async (original: string, translated: string) => {
     if (!original || original.trim().length === 0) return;
     
     try {
-      const { error } = await supabase.from("translations").insert({
+      await supabase.from("translations").insert({
         user_id: userId,
         meeting_id: meetingId,
         source_lang: "auto", 
@@ -135,62 +122,38 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
         original_text: original,
         translated_text: translated, 
       });
-
-      if (error) {
-        console.error("Error saving transcript to Supabase:", error);
-      }
     } catch (err) {
       console.error("Unexpected error saving transcript:", err);
     }
   };
 
   useEffect(() => {
-    // If deviceId changes and we are listening, we should optionally restart
-    // For now, let's just cleanup on unmount
+    startDeepgram();
     return () => {
       stopDeepgram();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Effect to handle device switching if already listening
+  // Effect to handle device switching if already active
   useEffect(() => {
-    if (isListening && deviceId) {
-        console.log("Device changed to", deviceId, "restarting transcription...");
+    if (deviceId && deepgramRef.current) {
         stopDeepgram();
-        // Give a bit of time for cleanup then restart
         setTimeout(() => startDeepgram(), 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceId]);
 
+  if (!transcriptDisplay) return null;
+
   return (
-    <div className="fixed bottom-20 left-4 z-50 bg-dark-1 p-3 rounded-lg text-white opacity-90 shadow-lg border border-gray-700">
-      <div className="flex items-center gap-3">
-        <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-        <p className="text-xs font-semibold">{isListening ? 'Live Transcription' : 'Transcription Off'}</p>
-        
-        {!isListening ? (
-             <button 
-             onClick={startDeepgram} 
-             className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded transition-colors"
-         >
-             Start
-         </button>
-        ) : (
-            <button 
-            onClick={stopDeepgram} 
-            className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition-colors"
-        >
-            Stop
-        </button>
-        )}
-       
-      </div>
-      <div className="mt-3 max-h-24 w-[250px] overflow-y-auto text-xs text-slate-300 font-mono bg-black/20 p-2 rounded">
-          {transcriptDisplay}
-      </div>
+    <div className="fixed bottom-[90px] left-0 w-full flex justify-center pointer-events-none z-50">
+        <div className="bg-black/60 px-6 py-2 rounded-full text-white text-lg font-medium whitespace-nowrap overflow-hidden max-w-[80%] text-center shadow-lg backdrop-blur-sm">
+            {transcriptDisplay}
+        </div>
     </div>
   );
 };
 
 export default Transcription;
+```

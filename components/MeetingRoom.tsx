@@ -13,7 +13,7 @@ import {
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { languages } from "@/constants/languages";
-import { Users, LayoutList, Languages } from "lucide-react";
+import { Users, LayoutList, Languages, Captions } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -37,16 +37,16 @@ const MeetingRoom = () => {
   const router = useRouter();
   const [layout, setLayout] = useState<CallLayoutType>("speaker-left");
   const [showParticipants, setShowParticipants] = useState(false);
+  const [showCaptions, setShowCaptions] = useState(false);
   const [targetLang, setTargetLang] = useState("en");
   const { useCallCallingState } = useCallStateHooks();
+  const { useMicrophoneState } = useCallStateHooks();
+  const { selectedDevice } = useMicrophoneState();
   const { user } = useUser();
   const call = useCall();
 
   // for more detail about types of CallingState see: https://getstream.io/video/docs/react/ui-cookbook/ringing-call/#incoming-call-panel
   const callingState = useCallCallingState();
-
-  const { useMicrophoneState } = useCallStateHooks();
-  const { selectedDevice } = useMicrophoneState();
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -76,7 +76,7 @@ const MeetingRoom = () => {
         </div>
       </div>
 
-      {user && call && (
+      {user && call && showCaptions && (
         <Transcription 
             userId={user.id} 
             meetingId={call.id} 
@@ -110,6 +110,14 @@ const MeetingRoom = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <button 
+            onClick={() => setShowCaptions((prev) => !prev)} 
+            title="Toggle Captions"
+            className={cn("cursor-pointer rounded-2xl px-4 py-2 hover:bg-[#4c535b]", showCaptions ? "bg-blue-600" : "bg-[#19232d]")}
+        >
+           <Captions size={20} className="text-white" />
+        </button>
 
         <DropdownMenu>
             <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]" title="Translate To">
