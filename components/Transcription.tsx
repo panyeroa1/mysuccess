@@ -46,6 +46,7 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
         language: "multi",
         smart_format: true,
         diarize: true,
+        utterance_end_ms: 1000,
       });
 
       deepgramRef.current = connection;
@@ -156,4 +157,3 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
 };
 
 export default Transcription;
-```
