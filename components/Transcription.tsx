@@ -14,6 +14,7 @@ interface TranscriptionProps {
   screenShareAudioStream?: MediaStream | null;
   speakerAudioStream?: MediaStream | null;
   sttEngine: "deepgram" | "web-speech" | "fast-whisper";
+  onFinalTranscript?: (text: string) => void;
 }
 
 const Transcription = ({
@@ -25,6 +26,7 @@ const Transcription = ({
   screenShareAudioStream,
   speakerAudioStream,
   sttEngine,
+  onFinalTranscript,
 }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const microphoneRef = useRef<MediaRecorder | null>(null);
@@ -50,6 +52,8 @@ const Transcription = ({
 
   const handleFinalTranscript = async (text: string) => {
     if (!text || text.trim().length === 0) return;
+
+    onFinalTranscript?.(text);
 
     let translated = text;
     let detectedLang = "en";
@@ -453,7 +457,7 @@ const Transcription = ({
 
   return (
     <div className="fixed bottom-20 left-0 z-[100] flex w-full justify-center px-3 pointer-events-none sm:bottom-[110px] sm:px-4">
-      <div className="videoke-caption max-w-[95vw] rounded-lg bg-black/60 px-3 py-2 text-left text-lg font-semibold leading-snug text-yellow-300 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-100 sm:max-w-5xl sm:rounded-xl sm:px-6 sm:py-4 sm:text-3xl">
+      <div className="videoke-caption max-w-[95vw] rounded-md bg-black/60 px-3 py-2 text-left text-[14px] font-light leading-snug text-yellow-300 drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-100 sm:max-w-5xl">
         {transcriptDisplay}
       </div>
     </div>

@@ -1,6 +1,6 @@
 // Code by Utsav Patel
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   CallControls,
   CallParticipantsList,
@@ -34,6 +34,7 @@ import {
 import Loader from "./Loader";
 import EndCallButton from "./EndCallButton";
 import { cn } from "@/lib/utils";
+import TranslatorPanel from "./TranslatorPanel";
 
 type CallLayoutType = "grid" | "speaker-left" | "speaker-right";
 
@@ -52,6 +53,8 @@ const MeetingRoom = () => {
   const [audioSource, setAudioSource] = useState<
     "auto" | "microphone" | "system" | "both"
   >("auto");
+  const [transcriptSentences, setTranscriptSentences] = useState<string[]>([]);
+  const lastTranscriptRef = useRef<string | null>(null);
   const [sttEngine, setSttEngine] = useState<
     "deepgram" | "web-speech" | "fast-whisper"
   >("deepgram");
@@ -82,6 +85,27 @@ const MeetingRoom = () => {
   const { user } = useUser();
   const call = useCall();
   const [showControls, setShowControls] = useState(true);
+
+  const pushTranscriptSentences = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    const segments =
+      trimmed
+        .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
+        ?.map((segment) => segment.trim()) ?? [trimmed];
+
+    setTranscriptSentences((prev) => {
+      const next = [...prev];
+      segments.forEach((segment) => {
+        if (!segment) return;
+        if (segment === lastTranscriptRef.current) return;
+        lastTranscriptRef.current = segment;
+        next.push(segment);
+      });
+      return next.slice(-80);
+    });
+  };
 
   // Auto-hide controls after 10 seconds of inactivity
   useEffect(() => {
@@ -202,12 +226,10 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
           )}
         >
           <div className="h-full rounded-2xl border border-white/10 bg-[#0f141c]/90 overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
-             <iframe 
-                src="https://eburon.ai/classroom/" 
-                className="w-full h-full border-none"
-                allow="autoplay; microphone; camera; display-capture; fullscreen"
-                title="Eburon Classroom"
-             />
+            <TranslatorPanel
+              sentences={transcriptSentences}
+              targetLang={targetLang}
+            />
           </div>
         </div>
       </div>
@@ -222,6 +244,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             screenShareAudioStream={sharedAudioStream}
             speakerAudioStream={speakerAudioStream}
             sttEngine={sttEngine}
+            onFinalTranscript={pushTranscriptSentences}
         />
       )}
 
