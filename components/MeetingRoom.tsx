@@ -13,7 +13,15 @@ import {
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { languages } from "@/constants/languages";
-import { Users, LayoutList, Languages, Captions, Globe, UserPlus } from "lucide-react";
+import {
+  Users,
+  LayoutList,
+  Languages,
+  Captions,
+  Globe,
+  UserPlus,
+  Mic,
+} from "lucide-react";
 import { useToast } from "./ui/use-toast";
 
 import {
@@ -41,18 +49,21 @@ const MeetingRoom = () => {
   const [showParticipants, setShowParticipants] = useState(false);
   const [showTranslator, setShowTranslator] = useState(false);
   const [showCaptions, setShowCaptions] = useState(false);
-  const [audioSource, setAudioSource] = useState<"microphone" | "system" | "both">("microphone");
+  const [audioSource, setAudioSource] = useState<
+    "auto" | "microphone" | "system" | "both"
+  >("auto");
+  const [sttEngine, setSttEngine] = useState<
+    "deepgram" | "web-speech" | "fast-whisper"
+  >("deepgram");
   const [targetLang, setTargetLang] = useState("en");
   const {
     useCallCallingState,
     useMicrophoneState,
     useLocalParticipant,
     useRemoteParticipants,
-    useScreenShareState,
     useHasOngoingScreenShare,
   } = useCallStateHooks();
   const { selectedDevice } = useMicrophoneState();
-  const { status: screenShareStatus } = useScreenShareState();
   const hasScreenShare = useHasOngoingScreenShare();
   const localParticipant = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants() ?? [];
@@ -105,19 +116,6 @@ const MeetingRoom = () => {
     };
   }, []);
   
-  const amISharing = screenShareStatus === "enabled";
-  // amISharing derived logic provided in useEffect below is sufficient
-  
-  // Auto-switch to "both" when screen sharing is active
-  useEffect(() => {
-    if (amISharing) {
-        setAudioSource("both");
-        setShowCaptions(true); 
-    } else {
-        setAudioSource("microphone");
-    }
-  }, [amISharing]);
-
   const handleInvite = () => {
     const meetingLink = window.location.href;
     const meetingId = call?.id;
@@ -223,6 +221,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             audioSource={audioSource}
             screenShareAudioStream={sharedAudioStream}
             speakerAudioStream={speakerAudioStream}
+            sttEngine={sttEngine}
         />
       )}
 
@@ -283,6 +282,14 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
               Caption Source
             </DropdownMenuItem>
             <DropdownMenuSeparator className="border-white/10" />
+            <DropdownMenuItem
+              onClick={() => {
+                setShowCaptions(true);
+                setAudioSource("auto");
+              }}
+            >
+              Auto (Detect Source)
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShowCaptions(false)}>
               Off
             </DropdownMenuItem>
@@ -310,6 +317,43 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             >
               Both (Mic + System)
             </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              iconButtonBase,
+              showCaptions && "bg-[#2563eb]/90 hover:bg-[#1d4ed8] border-[#60a5fa]/50"
+            )}
+            title="Speech Engine"
+          >
+            <Mic size={20} className="text-white" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className={menuContentClass}>
+            <DropdownMenuItem className="font-bold opacity-50" disabled>
+              Speech Engine
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="border-white/10" />
+            {[
+              { label: "Deepgram", value: "deepgram" },
+              { label: "Web Speech", value: "web-speech" },
+              { label: "Fast Whisper", value: "fast-whisper" },
+            ].map((engine) => (
+              <DropdownMenuItem
+                key={engine.value}
+                onClick={() => {
+                  setShowCaptions(true);
+                  setSttEngine(engine.value as typeof sttEngine);
+                }}
+                className={cn(
+                  "focus:bg-[#1b2430]",
+                  sttEngine === engine.value && "bg-[#1d4ed8]/40"
+                )}
+              >
+                {engine.label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
 

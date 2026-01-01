@@ -11,9 +11,10 @@ interface TranscriptionProps {
   meetingId: string;
   deviceId?: string;
   targetLang: string;
-  audioSource: "microphone" | "system" | "both";
+  audioSource: "auto" | "microphone" | "system" | "both";
   screenShareAudioStream?: MediaStream | null;
   speakerAudioStream?: MediaStream | null;
+  sttEngine: "deepgram" | "web-speech" | "fast-whisper";
 }
 
 const Transcription = ({
@@ -24,6 +25,7 @@ const Transcription = ({
   audioSource,
   screenShareAudioStream,
   speakerAudioStream,
+  sttEngine,
 }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
@@ -31,16 +33,87 @@ const Transcription = ({
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const auxStreamsRef = useRef<MediaStream[]>([]);
+  const speechRecognitionRef = useRef<any>(null);
+  const webSpeechActiveRef = useRef(false);
+  const fastWhisperBusyRef = useRef(false);
 
   const cloneAudioStream = (source?: MediaStream | null): MediaStream | null => {
-    const track = source?.getAudioTracks().find((item) => item.readyState === "live");
+    const track = source
+      ?.getAudioTracks()
+      .find((item) => item.readyState === "live" && item.enabled);
     if (!track) return null;
     return new MediaStream([track.clone()]);
+  };
+
+  const getExternalStream = (): MediaStream | null =>
+    cloneAudioStream(screenShareAudioStream) ??
+    cloneAudioStream(speakerAudioStream);
+
+  const handleFinalTranscript = async (text: string) => {
+    if (!text || text.trim().length === 0) return;
+
+    let translated = text;
+    let detectedLang = "en";
+
+    detectedLang = await detectLanguage(text);
+
+    if (targetLang && targetLang !== detectedLang) {
+      const tx = await translateText(text, targetLang);
+      if (tx) translated = tx;
+    }
+
+    setTranscriptDisplay(translated);
+    await saveTranscript(text, translated, detectedLang);
+  };
+
+  const handleInterimTranscript = (text: string) => {
+    if (!text || text.trim().length === 0) return;
+    setTranscriptDisplay(text);
+  };
+
+  const sendToFastWhisper = async (blob: Blob) => {
+    if (fastWhisperBusyRef.current) return null;
+    fastWhisperBusyRef.current = true;
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, "audio.webm");
+      formData.append("language", "auto");
+
+      const response = await fetch("/api/stt/fast-whisper", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Fast Whisper request failed", response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data?.text ?? null;
+    } catch (error) {
+      console.error("Fast Whisper error:", error);
+      return null;
+    } finally {
+      fastWhisperBusyRef.current = false;
+    }
   };
 
   const getAudioStream = async (): Promise<MediaStream | null> => {
     try {
       auxStreamsRef.current = [];
+
+      if (audioSource === "auto") {
+        const externalStream = getExternalStream();
+        if (externalStream) {
+          return externalStream;
+        }
+
+        const constraints: MediaStreamConstraints = {
+          audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        };
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      }
 
       if (audioSource === "microphone") {
         const constraints: MediaStreamConstraints = {
@@ -50,9 +123,7 @@ const Transcription = ({
       } 
       
       if (audioSource === "system") {
-         const externalStream =
-           cloneAudioStream(screenShareAudioStream) ??
-           cloneAudioStream(speakerAudioStream);
+         const externalStream = getExternalStream();
          if (externalStream) {
            return externalStream;
          }
@@ -75,9 +146,7 @@ const Transcription = ({
          };
          const micStream = await navigator.mediaDevices.getUserMedia(constraints);
          
-         let systemStream =
-           cloneAudioStream(screenShareAudioStream) ??
-           cloneAudioStream(speakerAudioStream);
+         let systemStream = getExternalStream();
 
          if (!systemStream) {
             try {
@@ -171,26 +240,12 @@ const Transcription = ({
            const text = alternative.transcript;
            
            if (data.is_final) {
-             let translated = text;
-             let detectedLang = "en";
-
-             // Detect language of the source text
-             detectedLang = await detectLanguage(text);
-
-             if (targetLang && targetLang !== detectedLang) { 
-                const tx = await translateText(text, targetLang);
-                if (tx) translated = tx;
-             }
-             
-             // Final result: Show it clearly (maybe clear after a delay or keep until next)
-             setTranscriptDisplay(translated);
-             
-             await saveTranscript(text, translated, detectedLang);
+             await handleFinalTranscript(text);
            } else {
              // Interim result: Show live "typing" effect
              // If we are translating, we still show the source text while speaking because we can't translate live easily without lag
              // User sees what they say, then it snaps to translation on pause.
-             setTranscriptDisplay(text);
+             handleInterimTranscript(text);
            }
         }
       });
