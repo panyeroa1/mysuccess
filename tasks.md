@@ -61,11 +61,11 @@ Known limitations or follow-up tasks:
 
 Task ID: T-0002
 Title: Configure Environment Variables
-Status: IN-PROGRESS
+Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
 Created: 2026-01-01 18:43
-Last updated: 2026-01-01 18:43
+Last updated: 2026-01-01 18:45
 
 START LOG
 
@@ -81,3 +81,57 @@ Files or modules expected to change:
 
 Risks or things to watch out for:
 - Ensure no extra spaces are added that might corrupt the keys.
+
+WORK CHECKLIST
+
+- [x] Code changes implemented according to the defined scope
+- [x] No unrelated refactors or drive-by changes
+- [x] Configuration and environment variables verified
+- [x] Database migrations or scripts documented if they exist (None)
+- [x] Logs and error handling reviewed
+
+END LOG
+
+Timestamp: 2026-01-01 18:45
+Summary of what actually changed:
+- Replaced the contents of `.env.local` with valid Clerk and Stream API keys.
+
+Files actually modified:
+- .env.local
+
+How it was tested:
+- Manually verified the file content using `view_file`.
+
+Test result:
+- PASS
+
+Known limitations or follow-up tasks:
+- None
+
+Task ID: T-0003
+Title: Fix Dependencies and Styling
+Status: IN-PROGRESS
+Owner: Miles
+Related repo: Zoom-Clone
+Created: 2026-01-01 18:50
+Last updated: 2026-01-01 18:50
+
+START LOG
+
+Timestamp: 2026-01-01 18:50
+Current behavior or state:
+- Multiple IDE errors reported regarding missing modules (react, @clerk/nextjs).
+- Markdown linting errors in README.md and tasks.md.
+- Dependencies likely not installed.
+
+Plan and scope for this task:
+- Run `npm install` to fix missing Type Definitions and Modules.
+- Fix Markdown lint warnings in README.md and tasks.md.
+
+Files or modules expected to change:
+- package-lock.json (updated by npm install)
+- README.md
+- tasks.md
+
+Risks or things to watch out for:
+- npm install might fail if node version is incompatible, but unlikely given the context.
