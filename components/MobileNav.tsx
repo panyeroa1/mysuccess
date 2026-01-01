@@ -34,10 +34,10 @@ const MobileNav = () => {
                 width={32}
                 height={32}
                 className="max-sm:size-10"
-                alt="Zoom Clone"
+                alt="Success Class"
               />
               <p className="text-[26px] font-extrabold text-white">
-                Zoom Clone
+                Success Class
               </p>
             </Link>
             <div className="flex h-[calc(100vh-72px)] flex-col justify-between overflow-y-auto">

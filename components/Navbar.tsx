@@ -22,10 +22,10 @@ const Navbar = () => {
             width={32}
             height={32}
             className="w-8 h-8"
-            alt="Zoom Clone"
+            alt="Success Class"
           />
           <p className="text-[20px] lg:text-[26px] font-extrabold text-white hidden sm:block">
-            Zoom Clone
+            Success Class
           </p>
         </Link>
 
