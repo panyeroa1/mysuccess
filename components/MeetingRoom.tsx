@@ -12,7 +12,8 @@ import {
   useCall,
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Users, LayoutList } from "lucide-react";
+import { languages } from "@/constants/languages";
+import { Users, LayoutList, Languages } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -36,6 +37,7 @@ const MeetingRoom = () => {
   const router = useRouter();
   const [layout, setLayout] = useState<CallLayoutType>("speaker-left");
   const [showParticipants, setShowParticipants] = useState(false);
+  const [targetLang, setTargetLang] = useState("en");
   const { useCallCallingState } = useCallStateHooks();
   const { user } = useUser();
   const call = useCall();
@@ -74,10 +76,17 @@ const MeetingRoom = () => {
         </div>
       </div>
 
-      {user && call && <Transcription userId={user.id} meetingId={call.id} deviceId={selectedDevice} />}
+      {user && call && (
+        <Transcription 
+            userId={user.id} 
+            meetingId={call.id} 
+            deviceId={selectedDevice} 
+            targetLang={targetLang}
+        />
+      )}
 
       {/* video layout and call controls */}
-      <div className="fixed bottom-0 flex w-full items-center justify-center gap-5">
+      <div className="fixed bottom-0 flex w-full items-center justify-center gap-5 pb-5 flex-wrap px-4">
         <CallControls onLeave={() => router.push(`/`)} />
 
         <DropdownMenu>
@@ -101,6 +110,26 @@ const MeetingRoom = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <DropdownMenu>
+            <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]" title="Translate To">
+                <Languages size={20} className="text-white" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="border-dark-1 bg-dark-1 text-white max-h-[300px] overflow-y-auto">
+                <DropdownMenuItem disabled className="font-bold opacity-50">Select Language</DropdownMenuItem>
+                <DropdownMenuSeparator className="border-dark-1" />
+                {languages.map((lang) => (
+                     <DropdownMenuItem 
+                        key={lang.value} 
+                        onClick={() => setTargetLang(lang.value)}
+                        className={targetLang === lang.value ? "bg-blue-600" : ""}
+                     >
+                        {lang.label}
+                     </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+
         <CallStatsButton />
         <button onClick={() => setShowParticipants((prev) => !prev)} title="Participants">
           <div className=" cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]  ">

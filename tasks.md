@@ -718,3 +718,50 @@ Test result:
 Known limitations or follow-up tasks:
 
 - None
+
+Task ID: T-0012
+Title: Implement Real-time Translation
+Status: IN-PROGRESS
+Owner: Miles
+Related repo: Zoom-Clone
+Created: 2026-01-01 20:05
+Last updated: 2026-01-01 20:05
+
+START LOG
+
+Timestamp: 2026-01-01 20:05
+Current behavior or state:
+
+- No translation support; only English transcription.
+- No UI for language selection.
+
+Plan and scope for this task:
+
+- Install `openai` SDK for Ollama connection.
+- Create `constants/languages.ts` with comprehensive language list.
+- Create `actions/translate.ts` server action using `OLLAMA_API_KEY`.
+- Update `Transcription.tsx` to translate final transcripts.
+- Update `MeetingRoom.tsx` with Language Selector Dropdown.
+- Configure `.env.local` with `OLLAMA_API_KEY`.
+
+Files or modules expected to change:
+
+- package.json
+- constants/languages.ts (new)
+- actions/translate.ts (new)
+- components/Transcription.tsx
+- components/MeetingRoom.tsx
+- .env.local
+
+Risks or things to watch out for:
+
+- Latency in translation.
+- Ollama endpoint reachability (assuming defaults or user config).
+
+WORK CHECKLIST
+
+- [/] Code changes implemented according to the defined scope
+- [/] No unrelated refactors or drive-by changes
+- [/] Configuration and environment variables verified
+- [ ] Database migrations or scripts documented if they exist (None)
+- [ ] Logs and error handling reviewed

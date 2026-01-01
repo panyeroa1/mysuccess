@@ -4,13 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
+import { translateText } from "@/actions/translate";
+
 interface TranscriptionProps {
   userId: string;
   meetingId: string;
   deviceId?: string;
+  targetLang: string;
 }
 
-const Transcription = ({ userId, meetingId, deviceId }: TranscriptionProps) => {
+const Transcription = ({ userId, meetingId, deviceId, targetLang }: TranscriptionProps) => {
   const [isListening, setIsListening] = useState(false);
   const [transcriptDisplay, setTranscriptDisplay] = useState("Initializing...");
   const deepgramRef = useRef<any>(null);
@@ -70,15 +73,18 @@ const Transcription = ({ userId, meetingId, deviceId }: TranscriptionProps) => {
         const alternative = data.channel.alternatives[0];
         if (alternative && alternative.transcript) {
            const text = alternative.transcript;
-           // We prefer 'is_final' for saving, but interim for display
-           // Deepgram returns is_final=true at end of utterance/sentence
            
            if (data.is_final) {
-             setTranscriptDisplay((prev) => (prev + " " + text).slice(-150));
-             await saveTranscript(text);
+             let translated = text;
+             if (targetLang && targetLang !== "en") { 
+                const tx = await translateText(text, targetLang);
+                if (tx) translated = tx;
+             }
+             
+             setTranscriptDisplay((prev) => (prev + " " + text + ` (${translated})`).slice(-200));
+             await saveTranscript(text, translated);
            } else {
-             // For UI feedback, show interim (maybe debounce this)
-             // setTranscriptDisplay((prev) => prev + " " + text);
+             // For UI feedback, show interim
            }
         }
       });
@@ -117,17 +123,17 @@ const Transcription = ({ userId, meetingId, deviceId }: TranscriptionProps) => {
     setTranscriptDisplay("Stopped.");
   };
 
-  const saveTranscript = async (text: string) => {
-    if (!text || text.trim().length === 0) return;
+  const saveTranscript = async (original: string, translated: string) => {
+    if (!original || original.trim().length === 0) return;
     
     try {
       const { error } = await supabase.from("translations").insert({
         user_id: userId,
         meeting_id: meetingId,
-        source_lang: "en", // Assuming detection is English or multi but we save mainly original text here
-        target_lang: "en",
-        original_text: text,
-        translated_text: text, 
+        source_lang: "auto", 
+        target_lang: targetLang || "en",
+        original_text: original,
+        translated_text: translated, 
       });
 
       if (error) {
