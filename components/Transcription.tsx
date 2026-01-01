@@ -12,9 +12,10 @@ interface TranscriptionProps {
   deviceId?: string;
   targetLang: string;
   audioSource: "microphone" | "system" | "both";
+  screenShareAudioStream?: MediaStream | null;
 }
 
-const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }: TranscriptionProps) => {
+const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, screenShareAudioStream }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
@@ -31,16 +32,22 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }:
       } 
       
       if (audioSource === "system") {
-         // getDisplayMedia requires video to be valid, but we only want audio
+         // Use provided stream if available
+         if (screenShareAudioStream) {
+             const audioTrack = screenShareAudioStream.getAudioTracks()[0];
+             if (audioTrack) {
+                 return new MediaStream([audioTrack.clone()]);
+             }
+         }
+
+         // Fallback: getDisplayMedia requires video to be valid
          const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-         // We only want the audio track
          const audioTrack = stream.getAudioTracks()[0];
          if (!audioTrack) {
             console.warn("No system audio track found. Did you check 'Share Audio'?");
             stream.getTracks().forEach(t => t.stop());
             return null;
          }
-         // Stop the video track immediately as we don't need it
          stream.getVideoTracks().forEach(t => t.stop());
          return new MediaStream([audioTrack]);
       }
@@ -51,15 +58,31 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }:
          };
          const micStream = await navigator.mediaDevices.getUserMedia(constraints);
          
-         const sysStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-         const sysAudioTrack = sysStream.getAudioTracks()[0];
+         let sysAudioTrack: MediaStreamTrack | undefined;
+
+         if (screenShareAudioStream) {
+             sysAudioTrack = screenShareAudioStream.getAudioTracks()[0]?.clone();
+         }
+
+         if (!sysAudioTrack) {
+            try {
+                const sysStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                sysAudioTrack = sysStream.getAudioTracks()[0];
+                if (sysAudioTrack) {
+                    // Stop video track immediately
+                    sysStream.getVideoTracks().forEach(t => t.stop());
+                } else {
+                     sysStream.getTracks().forEach(t => t.stop());
+                }
+            } catch (err) {
+                console.warn("System audio capture cancelled or failed", err);
+            }
+         }
          
          if (!sysAudioTrack) {
-             console.warn("No system audio text. Using mic only.");
-             sysStream.getTracks().forEach(t => t.stop());
+             console.warn("No system audio. Using mic only.");
              return micStream;
          }
-         sysStream.getVideoTracks().forEach(t => t.stop());
 
          // Mix them
          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();

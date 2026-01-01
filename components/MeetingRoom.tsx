@@ -1,6 +1,7 @@
 // Code by Utsav Patel
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
 import {
   CallControls,
   CallParticipantsList,
@@ -45,6 +46,25 @@ const MeetingRoom = () => {
   const { selectedDevice } = useMicrophoneState();
   const { user } = useUser();
   const call = useCall();
+  
+  const localParticipant = useLocalParticipant();
+  const amISharing = localParticipant?.isScreenSharing;
+  const screenShareAudioStream = localParticipant?.screenShareAudioStream;
+
+  // Auto-switch to "both" when screen sharing is active to capture system audio
+  useEffect(() => {
+    if (amISharing) {
+        setAudioSource("both");
+        setShowCaptions(true); // Auto-enable captions if sharing logic implies it
+    } else {
+        setAudioSource("microphone");
+    }
+  }, [amISharing]);
+
+  const iconButtonBase =
+    "flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-[#1b2430]/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition hover:bg-[#243244] hover:border-white/20";
+  const menuContentClass =
+    "border-white/10 bg-[#0f141c]/95 text-white shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur";
 
   // for more detail about types of CallingState see: https://getstream.io/video/docs/react/ui-cookbook/ringing-call/#incoming-call-panel
   const callingState = useCallCallingState();
@@ -63,17 +83,25 @@ const MeetingRoom = () => {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden pt-4 text-white">
-      <div className="relative flex size-full items-center justify-center">
-        <div className=" flex size-full max-w-[1000px] items-center">
-          <CallLayout />
+    <section className="relative h-screen w-full overflow-hidden bg-[#0b0f14] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(99,102,241,0.12),_transparent_40%)]" />
+      <div className="relative flex size-full">
+        <div className="relative flex size-full items-center justify-center px-4 pb-28 pt-4">
+          <div className="relative size-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f141c]/80 shadow-[0_24px_70px_rgba(0,0,0,0.55)]">
+            <CallLayout />
+          </div>
         </div>
         <div
-          className={cn("h-[calc(100vh-86px)] hidden ml-2", {
-            "show-block": showParticipants,
-          })}
+          className={cn(
+            "pointer-events-auto absolute right-4 top-4 bottom-24 hidden w-[320px] max-w-[90vw]",
+            {
+              "show-block": showParticipants,
+            }
+          )}
         >
-          <CallParticipantsList onClose={() => setShowParticipants(false)} />
+          <div className="h-full rounded-2xl border border-white/10 bg-[#0f141c]/90 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
+            <CallParticipantsList onClose={() => setShowParticipants(false)} />
+          </div>
         </div>
       </div>
 
@@ -88,16 +116,19 @@ const MeetingRoom = () => {
       )}
 
       {/* video layout and call controls */}
-      <div className="fixed bottom-0 flex w-full items-center justify-center gap-5 pb-5 flex-wrap px-4">
+      <div className="fixed bottom-4 left-1/2 z-20 flex w-[min(1100px,95vw)] -translate-x-1/2 flex-wrap items-center justify-center gap-3 rounded-2xl border border-white/10 bg-[#0f141c]/80 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
         <CallControls onLeave={() => router.push(`/`)} />
 
         <DropdownMenu>
           <div className="flex items-center">
-            <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]" title="Change Layout">
+            <DropdownMenuTrigger
+              className={cn(iconButtonBase)}
+              title="Change Layout"
+            >
               <LayoutList size={20} className="text-white" />
             </DropdownMenuTrigger>
           </div>
-          <DropdownMenuContent className="border-dark-1 bg-dark-1 text-white">
+          <DropdownMenuContent className={menuContentClass}>
             {["Grid", "Speaker-Left", "Speaker-Right"].map((item, index) => (
               <div key={index}>
                 <DropdownMenuItem
@@ -107,50 +138,93 @@ const MeetingRoom = () => {
                 >
                   {item}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="border-dark-1" />
+                <DropdownMenuSeparator className="border-white/10" />
               </div>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
         <DropdownMenu>
-            <DropdownMenuTrigger className={cn("cursor-pointer rounded-2xl px-4 py-2 hover:bg-[#4c535b]", showCaptions ? "bg-blue-600" : "bg-[#19232d]")} title="Caption Source">
-                <Captions size={20} className="text-white" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="border-dark-1 bg-dark-1 text-white">
-                <DropdownMenuItem className="font-bold opacity-50" disabled>Caption Source</DropdownMenuItem>
-                <DropdownMenuSeparator className="border-dark-1" />
-                <DropdownMenuItem onClick={() => setShowCaptions(false)}>Off</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("microphone"); }}>Microphone</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("system"); }}>System Audio</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("both"); }}>Both (Mic + System)</DropdownMenuItem>
-            </DropdownMenuContent>
+          <DropdownMenuTrigger
+            className={cn(
+              iconButtonBase,
+              showCaptions && "bg-[#2563eb]/90 hover:bg-[#1d4ed8] border-[#60a5fa]/50"
+            )}
+            title="Caption Source"
+          >
+            <Captions size={20} className="text-white" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className={menuContentClass}>
+            <DropdownMenuItem className="font-bold opacity-50" disabled>
+              Caption Source
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="border-white/10" />
+            <DropdownMenuItem onClick={() => setShowCaptions(false)}>
+              Off
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setShowCaptions(true);
+                setAudioSource("microphone");
+              }}
+            >
+              Microphone
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setShowCaptions(true);
+                setAudioSource("system");
+              }}
+            >
+              System Audio
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setShowCaptions(true);
+                setAudioSource("both");
+              }}
+            >
+              Both (Mic + System)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
         </DropdownMenu>
 
         <DropdownMenu>
-            <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]" title="Translate To">
-                <Languages size={20} className="text-white" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="border-dark-1 bg-dark-1 text-white max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem disabled className="font-bold opacity-50">Select Language</DropdownMenuItem>
-                <DropdownMenuSeparator className="border-dark-1" />
-                {languages.map((lang) => (
-                     <DropdownMenuItem 
-                        key={lang.value} 
-                        onClick={() => setTargetLang(lang.value)}
-                        className={targetLang === lang.value ? "bg-blue-600" : ""}
-                     >
-                        {lang.label}
-                     </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
+          <DropdownMenuTrigger
+            className={iconButtonBase}
+            title="Translate To"
+          >
+            <Languages size={20} className="text-white" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className={`${menuContentClass} max-h-[300px] overflow-y-auto`}
+          >
+            <DropdownMenuItem disabled className="font-bold opacity-50">
+              Select Language
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="border-white/10" />
+            {languages.map((lang) => (
+              <DropdownMenuItem
+                key={lang.value}
+                onClick={() => setTargetLang(lang.value)}
+                className={cn(
+                  "focus:bg-[#1b2430]",
+                  targetLang === lang.value && "bg-[#1d4ed8]/40"
+                )}
+              >
+                {lang.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
         </DropdownMenu>
 
         <CallStatsButton />
-        <button onClick={() => setShowParticipants((prev) => !prev)} title="Participants">
-          <div className=" cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]  ">
-            <Users size={20} className="text-white" />
-          </div>
+        <button
+          onClick={() => setShowParticipants((prev) => !prev)}
+          title="Participants"
+          className={iconButtonBase}
+        >
+          <Users size={20} className="text-white" />
         </button>
         {!isPersonalRoom && <EndCallButton />}
       </div>
