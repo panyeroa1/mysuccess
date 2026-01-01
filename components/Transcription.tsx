@@ -268,10 +268,89 @@ const Transcription = ({
     }
   };
 
-  const stopDeepgram = () => {
+  const startWebSpeech = () => {
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      console.warn("Web Speech API is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = navigator.language || "en-US";
+
+    webSpeechActiveRef.current = true;
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      let finalText = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        const result = event.results[i];
+        const transcript = result[0]?.transcript || "";
+        if (result.isFinal) {
+          finalText += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      if (interim) handleInterimTranscript(interim);
+      if (finalText.trim()) handleFinalTranscript(finalText.trim());
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Web Speech error", event);
+    };
+
+    recognition.onend = () => {
+      if (webSpeechActiveRef.current) {
+        try {
+          recognition.start();
+        } catch (err) {
+          console.error("Web Speech restart failed", err);
+        }
+      }
+    };
+
+    speechRecognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const startFastWhisper = async () => {
+    try {
+      const stream = await getAudioStream();
+      if (!stream) return;
+
+      streamRef.current = stream;
+
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      microphoneRef.current = recorder;
+
+      recorder.addEventListener("dataavailable", async (event) => {
+        if (!event.data || event.data.size === 0) return;
+        const text = await sendToFastWhisper(event.data);
+        if (text) {
+          await handleFinalTranscript(text);
+        }
+      });
+
+      recorder.start(3000);
+    } catch (error) {
+      console.error("Failed to start Fast Whisper", error);
+    }
+  };
+
+  const stopTranscription = () => {
     if (microphoneRef.current && microphoneRef.current.state !== "inactive") {
       microphoneRef.current.stop();
     }
+    microphoneRef.current = null;
     
     // Stop all tracks on the active stream
     if (streamRef.current) {
@@ -290,6 +369,17 @@ const Transcription = ({
             stream.getTracks().forEach((track) => track.stop());
         });
         auxStreamsRef.current = [];
+    }
+
+    if (speechRecognitionRef.current) {
+        webSpeechActiveRef.current = false;
+        try {
+          speechRecognitionRef.current.onend = null;
+          speechRecognitionRef.current.stop();
+        } catch (error) {
+          console.error("Failed to stop Web Speech", error);
+        }
+        speechRecognitionRef.current = null;
     }
 
     if (deepgramRef.current) {
@@ -316,12 +406,19 @@ const Transcription = ({
   };
 
   useEffect(() => {
-    startDeepgram();
+    if (sttEngine === "web-speech") {
+      startWebSpeech();
+    } else if (sttEngine === "fast-whisper") {
+      startFastWhisper();
+    } else {
+      startDeepgram();
+    }
+
     return () => {
-      stopDeepgram();
+      stopTranscription();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceId, audioSource, screenShareAudioStream, speakerAudioStream]); // Restart when device or source changes
+  }, [deviceId, audioSource, screenShareAudioStream, speakerAudioStream, sttEngine]); // Restart when device or source changes
 
   if (!transcriptDisplay) return null;
 
