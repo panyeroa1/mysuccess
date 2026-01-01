@@ -1,28 +1,27 @@
-Task ID: T-0032
-Title: Enhanced Transcription Subtitles and Audio Mixing
+Task ID: T-0033
+Title: Fix Layout Padding and Restore useEffect
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 23:58
-Last updated: 2026-01-02 00:00
+Created: 2026-01-02 00:08
+Last updated: 2026-01-02 00:10
 
 START LOG
 
-Timestamp: 2026-01-01 23:58
+Timestamp: 2026-01-02 00:08
 Current behavior or state:
 
-- Transcription centered.
-- Audio mixing logic already robust (mic + system/remote).
+- Layout has "ugly" margins (`px-4`).
+- `useEffect` missing from imports.
 
 Plan and scope for this task:
 
-- Update UI to "Left-Aligned Horizontal Subtitle" style.
-- Ensure container is wide enough.
-- Verify audio mixing logic matches "any shared audio" requirement.
+- Remove padding from `MeetingRoom.tsx` layout container.
+- Restore `useEffect` import.
 
 Files or modules expected to change:
 
-- components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 Risks or things to watch out for:
 
@@ -38,15 +37,15 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-02 00:00
+Timestamp: 2026-01-02 00:10
 Summary of what actually changed:
 
-- Changed caption style to left-aligned, wide container.
-- Increased background contrast.
+- Removed side/top margins for full-width view.
+- Fixed TS error.
 
 Files actually modified:
 
-- components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 How it was tested:
 
