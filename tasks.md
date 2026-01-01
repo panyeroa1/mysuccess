@@ -1,25 +1,21 @@
-Task ID: T-0025
-Title: Fix MeetingRoom.tsx Logic Errors
+Task ID: T-0026
+Title: Fix Screen Share State Detection
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:50
-Last updated: 2026-01-01 22:52
+Created: 2026-01-01 22:55
+Last updated: 2026-01-01 22:57
 
 START LOG
 
-Timestamp: 2026-01-01 22:50
+Timestamp: 2026-01-01 22:55
 Current behavior or state:
 
-- `useLocalParticipant` import error.
-- `showTranslator` state missing.
-- Globe button missing.
+- Type error: `isScreenSharing` not found on `StreamVideoParticipant`.
 
 Plan and scope for this task:
 
-- Fix hook imports (destructure from `useCallStateHooks`).
-- Add missing state.
-- Add missing button UI.
+- Use `useScreenShareState` hook to get sharing status and stream.
 
 Files or modules expected to change:
 
@@ -39,11 +35,10 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 22:52
+Timestamp: 2026-01-01 22:57
 Summary of what actually changed:
 
-- Corrected `useLocalParticipant` usage.
-- Re-added `showTranslator` state and toggle button.
+- Replaced direct property access with `useScreenShareState` hook.
 
 Files actually modified:
 
