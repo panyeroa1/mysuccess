@@ -85,6 +85,20 @@ const MeetingRoom = () => {
   const { user } = useUser();
   const call = useCall();
   const [showControls, setShowControls] = useState(true);
+  const localUserId = localParticipant?.userId ?? user?.id ?? null;
+  const listenerId = localUserId;
+  const resolvedSpeakerId = (() => {
+    if (audioSource === "microphone" || audioSource === "both") {
+      return localUserId;
+    }
+    if (audioSource === "system") {
+      return sharedAudioParticipant?.userId ?? localUserId;
+    }
+    if (sharedAudioParticipant?.userId) return sharedAudioParticipant.userId;
+    if (activeSpeaker?.userId) return activeSpeaker.userId;
+    if (localParticipant?.isSpeaking) return localUserId;
+    return localUserId;
+  })();
 
   const pushTranscriptSentences = (text: string) => {
     const trimmed = text.trim();
@@ -229,6 +243,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             <TranslatorPanel
               sentences={transcriptSentences}
               targetLang={targetLang}
+              onLanguageChange={setTargetLang}
             />
           </div>
         </div>
@@ -238,6 +253,8 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
         <Transcription 
             userId={user.id} 
             meetingId={call.id} 
+            speakerId={resolvedSpeakerId}
+            listenerId={listenerId}
             deviceId={selectedDevice} 
             targetLang={targetLang}
             audioSource={audioSource}

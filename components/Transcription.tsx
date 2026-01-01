@@ -8,6 +8,8 @@ import { translateText, detectLanguage } from "@/actions/translate";
 interface TranscriptionProps {
   userId: string;
   meetingId: string;
+  speakerId?: string | null;
+  listenerId?: string | null;
   deviceId?: string;
   targetLang: string;
   audioSource: "auto" | "microphone" | "system" | "both";
@@ -20,6 +22,8 @@ interface TranscriptionProps {
 const Transcription = ({
   userId,
   meetingId,
+  speakerId,
+  listenerId,
   deviceId,
   targetLang,
   audioSource,
@@ -37,6 +41,15 @@ const Transcription = ({
   const webSpeechActiveRef = useRef(false);
   const fastWhisperBusyRef = useRef(false);
   const deepgramBusyRef = useRef(false);
+  const transcriptRowRef = useRef<string | null>(null);
+  const transcriptBufferRef = useRef({ original: "", translated: "" });
+
+  const appendTranscript = (current: string, next: string) => {
+    const trimmed = next.trim();
+    if (!trimmed) return current;
+    if (!current) return trimmed;
+    return `${current}\n${trimmed}`;
+  };
 
   const cloneAudioStream = (source?: MediaStream | null): MediaStream | null => {
     const track = source
@@ -425,14 +438,57 @@ const Transcription = ({
     if (!original || original.trim().length === 0) return;
     
     try {
-      await supabase.from("translations").insert({
-        user_id: userId,
+      const resolvedListenerId = listenerId || userId;
+      const resolvedSpeakerId = speakerId || resolvedListenerId;
+      const nextOriginal = appendTranscript(
+        transcriptBufferRef.current.original,
+        original
+      );
+      const nextTranslated = appendTranscript(
+        transcriptBufferRef.current.translated,
+        translated || original
+      );
+
+      transcriptBufferRef.current = {
+        original: nextOriginal,
+        translated: nextTranslated,
+      };
+
+      const payload = {
+        user_id: resolvedListenerId,
         meeting_id: meetingId,
+        speaker_id: resolvedSpeakerId,
+        listener_id: resolvedListenerId,
         source_lang: sourceLang || "auto", 
         target_lang: targetLang || "en",
-        original_text: original,
-        translated_text: translated, 
-      });
+        original_text: nextOriginal,
+        translated_text: nextTranslated, 
+      };
+
+      if (transcriptRowRef.current) {
+        const { error } = await supabase
+          .from("translations")
+          .update(payload)
+          .eq("id", transcriptRowRef.current);
+
+        if (error) {
+          console.error("Failed to update transcript:", error);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("translations")
+        .insert(payload)
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("Failed to create transcript row:", error);
+        return;
+      }
+
+      transcriptRowRef.current = data?.id ?? null;
     } catch (err) {
       console.error("Unexpected error saving transcript:", err);
     }

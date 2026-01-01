@@ -1,6 +1,7 @@
 "use server";
 
 import { Ollama } from "ollama";
+import { languages } from "@/constants/languages";
 
 const ollama = new Ollama({
   host: "https://ollama.com",
@@ -13,12 +14,14 @@ export const translateText = async (text: string, targetLang: string) => {
   if (!text || !targetLang) return null;
 
   try {
+    const targetLabel =
+      languages.find((lang) => lang.value === targetLang)?.label || targetLang;
     const response = await ollama.chat({
       model: "gpt-oss:120b", // Using the cloud model ID as per docs
       messages: [
         {
           role: "system",
-          content: `You are a translator. Translate the following text to ${targetLang}. Return ONLY the translation, no introductory text.`,
+          content: `You are a translator. Translate the following text to ${targetLabel}. Return ONLY the translation, no introductory text.`,
         },
         {
           role: "user",
