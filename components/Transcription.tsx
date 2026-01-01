@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
+import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
 interface TranscriptionProps {
   userId: string;
@@ -10,76 +11,121 @@ interface TranscriptionProps {
 
 const Transcription = ({ userId, meetingId }: TranscriptionProps) => {
   const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
+  const [transcriptDisplay, setTranscriptDisplay] = useState("Initializing...");
+  const deepgramRef = useRef<any>(null);
+  const microphoneRef = useRef<MediaRecorder | null>(null);
 
-  const startListening = useCallback(() => {
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-      console.error("Speech recognition not supported");
-      return;
-    }
+  const startDeepgram = async () => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY;
+      if (!apiKey) {
+        console.error("Deepgram API Key missing");
+        return;
+      }
 
-    // @ts-ignore
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+      setTranscriptDisplay("Requesting microphone...");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      if (!MediaRecorder.isTypeSupported("audio/webm")) {
+        console.warn("Browser does not support audio/webm");
+        // Fallback or error handling
+      }
 
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US"; // Default to English
+      const microphone = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      microphoneRef.current = microphone;
 
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
+      const deepgram = createClient(apiKey);
+      
+      const connection = deepgram.listen.live({
+        model: "nova-3",
+        language: "multi",
+        smart_format: true,
+        diarize: true,
+      });
 
-    recognition.onresult = (event: any) => {
-      let finalTranscript = "";
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+      deepgramRef.current = connection;
+
+      connection.on(LiveTranscriptionEvents.Open, () => {
+        console.log("Deepgram connection open");
+        setTranscriptDisplay("Listening...");
+        setIsListening(true);
+
+        microphone.addEventListener("dataavailable", (event) => {
+          if (event.data.size > 0 && connection.getReadyState() === 1) {
+            connection.send(event.data);
+          }
+        });
+
+        microphone.start(250); // Send distinct chunks every 250ms
+      });
+
+      connection.on(LiveTranscriptionEvents.Transcript, async (data) => {
+        // Handle transcript
+        const alternative = data.channel.alternatives[0];
+        if (alternative && alternative.transcript) {
+           const text = alternative.transcript;
+           // We prefer 'is_final' for saving, but interim for display
+           // Deepgram returns is_final=true at end of utterance/sentence
+           
+           if (data.is_final) {
+             setTranscriptDisplay((prev) => (prev + " " + text).slice(-150));
+             await saveTranscript(text);
+           } else {
+             // For UI feedback, show interim (maybe debounce this)
+             // setTranscriptDisplay((prev) => prev + " " + text);
+           }
         }
-      }
+      });
 
-      if (finalTranscript) {
-        setTranscript((prev) => prev + " " + finalTranscript);
-        saveTranscript(finalTranscript);
-      }
-    };
+      connection.on(LiveTranscriptionEvents.Close, () => {
+        console.log("Deepgram connection closed");
+        setIsListening(false);
+        setTranscriptDisplay("Connection closed.");
+      });
 
-    recognition.onerror = (event: any) => {
-      console.error("Speech recognition error", event.error);
+      connection.on(LiveTranscriptionEvents.Error, (err) => {
+        console.error("Deepgram error", err);
+        setTranscriptDisplay("Error occurred.");
+        setIsListening(false);
+      });
+
+    } catch (error) {
+      console.error("Failed to start Deepgram", error);
+      setTranscriptDisplay("Failed to start.");
       setIsListening(false);
-    };
-
-    recognition.onend = () => {
-        // Automatically restart if supposed to be listening (simple keep-alive)
-        // But for this simple implementation, we might let it stop.
-        // To be robust, one would handle restarting here.
-       // setIsListening(false); 
-    };
-
-    recognition.start();
-    
-    // Cleanup function to stop if component unmounts
-    return () => {
-        recognition.stop();
     }
+  };
 
-  }, [userId, meetingId]);
+  const stopDeepgram = () => {
+    if (microphoneRef.current && microphoneRef.current.state !== "inactive") {
+      microphoneRef.current.stop(); // This will stop recording
+      // Also stop the tracks to release the mic
+      microphoneRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+    if (deepgramRef.current) {
+        // Finish sending?
+        deepgramRef.current.finish(); 
+        deepgramRef.current = null;
+    }
+    setIsListening(false);
+    setTranscriptDisplay("Stopped.");
+  };
 
   const saveTranscript = async (text: string) => {
+    if (!text || text.trim().length === 0) return;
+    
     try {
       const { error } = await supabase.from("translations").insert({
         user_id: userId,
         meeting_id: meetingId,
-        source_lang: "en",
+        source_lang: "en", // Assuming detection is English or multi but we save mainly original text here
         target_lang: "en",
         original_text: text,
-        translated_text: text, // Saving original as translated for now since no translation logic involved
+        translated_text: text, 
       });
 
       if (error) {
-        console.error("Error saving transcript:", error);
-      } else {
-        console.log("Transcript saved successfully");
+        console.error("Error saving transcript to Supabase:", error);
       }
     } catch (err) {
       console.error("Unexpected error saving transcript:", err);
@@ -87,35 +133,38 @@ const Transcription = ({ userId, meetingId }: TranscriptionProps) => {
   };
 
   useEffect(() => {
-    // Start listening automatically when component mounts, or provide a button.
-    // Given usage in a meeting, maybe auto-start or button?
-    // Let's provide a visible indicator/button for now to be safe, or auto-start.
-    // User request: "add transcription from a speaking user".
-    // I'll make it auto-start for now to be seamless, but log errors if permission denied.
-    
-    // Actually, simple auto-start might be blocked by browser policy without user interaction.
-    // But since they are already in a meeting (handling media), maybe it's fine.
-    // Let's return a UI component that shows status.
+    // Cleanup on unmount
+    return () => {
+      stopDeepgram();
+    };
   }, []);
 
   return (
-    <div className="fixed bottom-20 left-4 z-50 bg-dark-1 p-2 rounded-lg text-white opacity-80 hover:opacity-100 transition-opacity">
-      <div className="flex items-center gap-2">
+    <div className="fixed bottom-20 left-4 z-50 bg-dark-1 p-3 rounded-lg text-white opacity-90 shadow-lg border border-gray-700">
+      <div className="flex items-center gap-3">
         <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-        <p className="text-xs">{isListening ? 'Transcribing...' : 'Transcription Off'}</p>
-        <button 
-            onClick={startListening} 
-            className="text-xs bg-blue-1 px-2 py-1 rounded ml-2"
-            disabled={isListening}
+        <p className="text-xs font-semibold">{isListening ? 'Live Transcription' : 'Transcription Off'}</p>
+        
+        {!isListening ? (
+             <button 
+             onClick={startDeepgram} 
+             className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded transition-colors"
+         >
+             Start
+         </button>
+        ) : (
+            <button 
+            onClick={stopDeepgram} 
+            className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded transition-colors"
         >
-            {isListening ? 'Active' : 'Start'}
+            Stop
         </button>
+        )}
+       
       </div>
-      {transcript && (
-          <div className="mt-2 max-h-20 max-w-[200px] overflow-y-auto text-[10px] text-gray-300">
-              {transcript.slice(-100)}...
-          </div>
-      )}
+      <div className="mt-3 max-h-24 w-[250px] overflow-y-auto text-xs text-slate-300 font-mono bg-black/20 p-2 rounded">
+          {transcriptDisplay}
+      </div>
     </div>
   );
 };
