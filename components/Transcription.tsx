@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
-import { translateText } from "@/actions/translate";
+import { translateText, detectLanguage } from "@/actions/translate";
 
 interface TranscriptionProps {
   userId: string;
