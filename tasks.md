@@ -1,28 +1,25 @@
-Task ID: T-0036
-Title: Full Width Fix and Transcription Debugging
+Task ID: T-0037
+Title: Fix JSX Syntax Error in MeetingRoom
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-02 00:35
-Last updated: 2026-01-02 00:37
+Created: 2026-01-02 00:42
+Last updated: 2026-01-02 00:43
 
 START LOG
 
-Timestamp: 2026-01-02 00:35
+Timestamp: 2026-01-02 00:42
 Current behavior or state:
 
-- Video container has margins/borders ("ugly").
-- Transcription reportedly "not working".
+- Syntax error: Duplicate opening `div`.
 
 Plan and scope for this task:
 
-- Remove all layout constraints (borders, padding, radius) for 100% width.
-- Add error logging to `Transcription.tsx`.
+- Remove duplicate line in `MeetingRoom.tsx`.
 
 Files or modules expected to change:
 
 - components/MeetingRoom.tsx
-- components/Transcription.tsx
 
 Risks or things to watch out for:
 
@@ -38,16 +35,14 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-02 00:37
+Timestamp: 2026-01-02 00:43
 Summary of what actually changed:
 
-- Removed layout artifacts for edge-to-edge view.
-- Added connection error logs.
+- Removed extra `div` tag.
 
 Files actually modified:
 
 - components/MeetingRoom.tsx
-- components/Transcription.tsx
 
 How it was tested:
 
@@ -60,4 +55,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- Transcription failure might be API related; logging will confirm.
+- None

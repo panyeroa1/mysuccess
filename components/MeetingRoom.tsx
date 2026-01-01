@@ -159,7 +159,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
     <section className="relative h-[100svh] w-full overflow-hidden bg-[#0b0f14] text-white min-h-[100svh]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(99,102,241,0.12),_transparent_40%)]" />
       <div className="relative flex size-full">
-      <div className="relative flex size-full">
+
         {/* Full width, no padding, no border for edge-to-edge experience */}
         <div className="relative flex size-full items-center justify-center bg-black">
           <div className="relative size-full overflow-hidden bg-[#0f141c]">
