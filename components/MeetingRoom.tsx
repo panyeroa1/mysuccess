@@ -43,6 +43,9 @@ const MeetingRoom = () => {
   // for more detail about types of CallingState see: https://getstream.io/video/docs/react/ui-cookbook/ringing-call/#incoming-call-panel
   const callingState = useCallCallingState();
 
+  const { useMicrophoneState } = useCallStateHooks();
+  const { selectedDevice } = useMicrophoneState();
+
   if (callingState !== CallingState.JOINED) return <Loader />;
 
   const CallLayout = () => {
@@ -71,7 +74,7 @@ const MeetingRoom = () => {
         </div>
       </div>
 
-      {user && call && <Transcription userId={user.id} meetingId={call.id} />}
+      {user && call && <Transcription userId={user.id} meetingId={call.id} deviceId={selectedDevice} />}
 
       {/* video layout and call controls */}
       <div className="fixed bottom-0 flex w-full items-center justify-center gap-5">

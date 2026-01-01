@@ -7,9 +7,10 @@ import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 interface TranscriptionProps {
   userId: string;
   meetingId: string;
+  deviceId?: string;
 }
 
-const Transcription = ({ userId, meetingId }: TranscriptionProps) => {
+const Transcription = ({ userId, meetingId, deviceId }: TranscriptionProps) => {
   const [isListening, setIsListening] = useState(false);
   const [transcriptDisplay, setTranscriptDisplay] = useState("Initializing...");
   const deepgramRef = useRef<any>(null);
@@ -24,7 +25,12 @@ const Transcription = ({ userId, meetingId }: TranscriptionProps) => {
       }
 
       setTranscriptDisplay("Requesting microphone...");
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      const constraints: MediaStreamConstraints = {
+        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
       if (!MediaRecorder.isTypeSupported("audio/webm")) {
         console.warn("Browser does not support audio/webm");
