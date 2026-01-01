@@ -375,3 +375,41 @@ Test result:
 Known limitations or follow-up tasks:
 
 - None
+
+Task ID: T-0007
+Title: Implement Transcription with Supabase
+Status: IN-PROGRESS
+Owner: Miles
+Related repo: Zoom-Clone
+Created: 2026-01-01 19:15
+Last updated: 2026-01-01 19:15
+
+START LOG
+
+Timestamp: 2026-01-01 19:15
+Current behavior or state:
+
+- Application has no transcription feature.
+- No connection to Supabase.
+
+Plan and scope for this task:
+
+- Configure `.env.local` with Supabase credentials.
+- Install `@supabase/supabase-js`.
+- Create a Supabase client helper.
+- Implement a `Transcription` component using standard Web Speech API.
+- Inject this component into `MeetingRoom.tsx` to handle "speaking user" transcription.
+- Save transcripts to `translations` table in Supabase.
+
+Files or modules expected to change:
+
+- .env.local
+- package.json
+- lib/supabase.ts (new)
+- components/Transcription.tsx (new)
+- components/MeetingRoom.tsx
+
+Risks or things to watch out for:
+
+- Browser compatibility for Web Speech API (works in Chrome/Safari usually).
+- Ensuring `meeting_id` is available to the component.
