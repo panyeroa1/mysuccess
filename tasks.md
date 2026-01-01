@@ -1,32 +1,35 @@
-Task ID: T-0016
-Title: Implement Videoke Style Captions
+Task ID: T-0018
+Title: Audio Source Selection
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 21:10
-Last updated: 2026-01-01 21:12
+Created: 2026-01-01 21:30
+Last updated: 2026-01-01 21:33
 
 START LOG
 
-Timestamp: 2026-01-01 21:10
+Timestamp: 2026-01-01 21:30
 Current behavior or state:
 
-- Captions are a single scrolling line in a small pill container.
-- User requested "Videoke type" (Karaoke).
+- Transcription only uses default microphone.
+- No way to transcribe system audio or both.
 
 Plan and scope for this task:
 
-- Handle `interim` results from Deepgram to show text *as it is spoken* (typing effect).
-- Style the captions to look like Karaoke: Large, Yellow, with Black Outline/Shadow.
-- Remove the "scrolling" logic and just show the current active utterance.
+- Update `MeetingRoom.tsx` to replace Caption toggle with Dropdown (Mic, System, Both, Off).
+- Update `Transcription.tsx` to implement stream mixing.
+    - `system`: `getDisplayMedia` audio track.
+    - `both`: `AudioContext` mixing of `getUserMedia` and `getDisplayMedia`.
 
 Files or modules expected to change:
 
 - components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 Risks or things to watch out for:
 
-- Translation latency means the text might "snap" from Source Language (while speaking) to Target Language (when sentence ends). This is expected behavior for live translation.
+- `getDisplayMedia` requires user interaction and permission.
+- AudioContext mixing adds complexity to cleanup; ensures contexts are closed.
 
 WORK CHECKLIST
 
@@ -38,20 +41,20 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 21:12
+Timestamp: 2026-01-01 21:33
 Summary of what actually changed:
 
-- Updated `Transcription.tsx`:
-    - Logic: Now updates state on `!is_final` events (interim).
-    - Styling: Changed container to be larger, transparent black background with blur, and text to be `text-yellow-300` `text-3xl` `font-bold` with a heavy black text shadow.
+- `MeetingRoom.tsx`: Added `audioSource` state and Dropdown UI for selecting "Microphone", "System Audio", "Both".
+- `Transcription.tsx`: Implemented `getAudioStream` which handles stream acquisition and mixing via `AudioContext`. Updated cleanup logic (`stopDeepgram`) to close contexts and stop mixed tracks.
 
 Files actually modified:
 
 - components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 How it was tested:
 
-- Code review of styles and logic.
+- Code review of audio logic.
 - Push to build.
 
 Test result:
@@ -60,4 +63,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- None
+- "System Audio" relies on the user checking the "Share Audio" checkbox in the browser sharing dialog.

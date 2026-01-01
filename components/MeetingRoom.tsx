@@ -38,6 +38,7 @@ const MeetingRoom = () => {
   const [layout, setLayout] = useState<CallLayoutType>("speaker-left");
   const [showParticipants, setShowParticipants] = useState(false);
   const [showCaptions, setShowCaptions] = useState(false);
+  const [audioSource, setAudioSource] = useState<"microphone" | "system" | "both">("microphone");
   const [targetLang, setTargetLang] = useState("en");
   const { useCallCallingState } = useCallStateHooks();
   const { useMicrophoneState } = useCallStateHooks();
@@ -82,6 +83,7 @@ const MeetingRoom = () => {
             meetingId={call.id} 
             deviceId={selectedDevice} 
             targetLang={targetLang}
+            audioSource={audioSource}
         />
       )}
 
@@ -111,13 +113,19 @@ const MeetingRoom = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <button 
-            onClick={() => setShowCaptions((prev) => !prev)} 
-            title="Toggle Captions"
-            className={cn("cursor-pointer rounded-2xl px-4 py-2 hover:bg-[#4c535b]", showCaptions ? "bg-blue-600" : "bg-[#19232d]")}
-        >
-           <Captions size={20} className="text-white" />
-        </button>
+        <DropdownMenu>
+            <DropdownMenuTrigger className={cn("cursor-pointer rounded-2xl px-4 py-2 hover:bg-[#4c535b]", showCaptions ? "bg-blue-600" : "bg-[#19232d]")} title="Caption Source">
+                <Captions size={20} className="text-white" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="border-dark-1 bg-dark-1 text-white">
+                <DropdownMenuItem className="font-bold opacity-50" disabled>Caption Source</DropdownMenuItem>
+                <DropdownMenuSeparator className="border-dark-1" />
+                <DropdownMenuItem onClick={() => setShowCaptions(false)}>Off</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("microphone"); }}>Microphone</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("system"); }}>System Audio</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setShowCaptions(true); setAudioSource("both"); }}>Both (Mic + System)</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
             <DropdownMenuTrigger className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]" title="Translate To">

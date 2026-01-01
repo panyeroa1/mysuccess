@@ -11,12 +11,76 @@ interface TranscriptionProps {
   meetingId: string;
   deviceId?: string;
   targetLang: string;
+  audioSource: "microphone" | "system" | "both";
 }
 
-const Transcription = ({ userId, meetingId, deviceId, targetLang }: TranscriptionProps) => {
+const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const getAudioStream = async (): Promise<MediaStream | null> => {
+    try {
+      if (audioSource === "microphone") {
+        const constraints: MediaStreamConstraints = {
+          audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        };
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      } 
+      
+      if (audioSource === "system") {
+         // getDisplayMedia requires video to be valid, but we only want audio
+         const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+         // We only want the audio track
+         const audioTrack = stream.getAudioTracks()[0];
+         if (!audioTrack) {
+            console.warn("No system audio track found. Did you check 'Share Audio'?");
+            stream.getTracks().forEach(t => t.stop());
+            return null;
+         }
+         // Stop the video track immediately as we don't need it
+         stream.getVideoTracks().forEach(t => t.stop());
+         return new MediaStream([audioTrack]);
+      }
+
+      if (audioSource === "both") {
+         const constraints: MediaStreamConstraints = {
+            audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+         };
+         const micStream = await navigator.mediaDevices.getUserMedia(constraints);
+         
+         const sysStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+         const sysAudioTrack = sysStream.getAudioTracks()[0];
+         
+         if (!sysAudioTrack) {
+             console.warn("No system audio text. Using mic only.");
+             sysStream.getTracks().forEach(t => t.stop());
+             return micStream;
+         }
+         sysStream.getVideoTracks().forEach(t => t.stop());
+
+         // Mix them
+         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+         audioContextRef.current = ctx;
+
+         const micSource = ctx.createMediaStreamSource(micStream);
+         const sysSource = ctx.createMediaStreamSource(new MediaStream([sysAudioTrack]));
+         const dest = ctx.createMediaStreamDestination();
+
+         micSource.connect(dest);
+         sysSource.connect(dest);
+
+         return dest.stream;
+      }
+
+      return null;
+    } catch (err) {
+        console.error("Error getting stream:", err);
+        return null;
+    }
+  };
 
   const startDeepgram = async () => {
     try {
@@ -26,12 +90,11 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
         return;
       }
 
-      const constraints: MediaStreamConstraints = {
-        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      const stream = await getAudioStream();
+      if (!stream) return;
       
+      streamRef.current = stream;
+
       if (!MediaRecorder.isTypeSupported("audio/webm")) {
         console.warn("Browser does not support audio/webm");
       }
@@ -107,8 +170,20 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
   const stopDeepgram = () => {
     if (microphoneRef.current && microphoneRef.current.state !== "inactive") {
       microphoneRef.current.stop();
-      microphoneRef.current.stream.getTracks().forEach(track => track.stop());
     }
+    
+    // Stop all tracks on the active stream
+    if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+    }
+
+    // Close AudioContext if open
+    if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+    }
+
     if (deepgramRef.current) {
         deepgramRef.current.finish(); 
         deepgramRef.current = null;
