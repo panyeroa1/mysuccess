@@ -16,15 +16,32 @@ interface TranscriptionProps {
   speakerAudioStream?: MediaStream | null;
 }
 
-const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, screenShareAudioStream, speakerAudioStream }: TranscriptionProps) => {
+const Transcription = ({
+  userId,
+  meetingId,
+  deviceId,
+  targetLang,
+  audioSource,
+  screenShareAudioStream,
+  speakerAudioStream,
+}: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const auxStreamsRef = useRef<MediaStream[]>([]);
+
+  const cloneAudioStream = (source?: MediaStream | null): MediaStream | null => {
+    const track = source?.getAudioTracks().find((item) => item.readyState === "live");
+    if (!track) return null;
+    return new MediaStream([track.clone()]);
+  };
 
   const getAudioStream = async (): Promise<MediaStream | null> => {
     try {
+      auxStreamsRef.current = [];
+
       if (audioSource === "microphone") {
         const constraints: MediaStreamConstraints = {
           audio: deviceId ? { deviceId: { exact: deviceId } } : true,
@@ -33,12 +50,11 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
       } 
       
       if (audioSource === "system") {
-         // Use provided stream if available
-         if (screenShareAudioStream) {
-             const audioTrack = screenShareAudioStream.getAudioTracks()[0];
-             if (audioTrack) {
-                 return new MediaStream([audioTrack.clone()]);
-             }
+         const externalStream =
+           cloneAudioStream(screenShareAudioStream) ??
+           cloneAudioStream(speakerAudioStream);
+         if (externalStream) {
+           return externalStream;
          }
 
          // Fallback: getDisplayMedia requires video to be valid
@@ -59,19 +75,18 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
          };
          const micStream = await navigator.mediaDevices.getUserMedia(constraints);
          
-         let sysAudioTrack: MediaStreamTrack | undefined;
+         let systemStream =
+           cloneAudioStream(screenShareAudioStream) ??
+           cloneAudioStream(speakerAudioStream);
 
-         if (screenShareAudioStream) {
-             sysAudioTrack = screenShareAudioStream.getAudioTracks()[0]?.clone();
-         }
-
-         if (!sysAudioTrack) {
+         if (!systemStream) {
             try {
                 const sysStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-                sysAudioTrack = sysStream.getAudioTracks()[0];
+                const sysAudioTrack = sysStream.getAudioTracks()[0];
                 if (sysAudioTrack) {
                     // Stop video track immediately
                     sysStream.getVideoTracks().forEach(t => t.stop());
+                    systemStream = new MediaStream([sysAudioTrack]);
                 } else {
                      sysStream.getTracks().forEach(t => t.stop());
                 }
@@ -80,7 +95,7 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
             }
          }
          
-         if (!sysAudioTrack) {
+         if (!systemStream) {
              console.warn("No system audio. Using mic only.");
              return micStream;
          }
@@ -90,11 +105,13 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
          audioContextRef.current = ctx;
 
          const micSource = ctx.createMediaStreamSource(micStream);
-         const sysSource = ctx.createMediaStreamSource(new MediaStream([sysAudioTrack]));
+         const sysSource = ctx.createMediaStreamSource(systemStream);
          const dest = ctx.createMediaStreamDestination();
 
          micSource.connect(dest);
          sysSource.connect(dest);
+
+         auxStreamsRef.current.push(micStream, systemStream);
 
          return dest.stream;
       }
@@ -208,6 +225,13 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
         audioContextRef.current = null;
     }
 
+    if (auxStreamsRef.current.length) {
+        auxStreamsRef.current.forEach((stream) => {
+            stream.getTracks().forEach((track) => track.stop());
+        });
+        auxStreamsRef.current = [];
+    }
+
     if (deepgramRef.current) {
         deepgramRef.current.finish(); 
         deepgramRef.current = null;
@@ -237,14 +261,14 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, s
       stopDeepgram();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceId, audioSource]); // Restart when device or source changes
+  }, [deviceId, audioSource, screenShareAudioStream, speakerAudioStream]); // Restart when device or source changes
 
   if (!transcriptDisplay) return null;
 
   return (
-    <div className="fixed bottom-[100px] left-0 w-full flex justify-center pointer-events-none z-[100] px-4">
+    <div className="fixed bottom-[110px] left-0 w-full flex justify-center pointer-events-none z-[100] px-4">
         <div 
-          className="videoke-caption text-yellow-300 text-3xl font-bold text-center drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/40 px-6 py-4 rounded-xl backdrop-blur-sm transition-all duration-100"
+          className="videoke-caption w-full max-w-5xl text-yellow-300 text-3xl font-bold text-left drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/60 px-6 py-4 rounded-xl backdrop-blur-md transition-all duration-100"
         >
             {transcriptDisplay}
         </div>

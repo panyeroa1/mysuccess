@@ -1,27 +1,28 @@
-Task ID: T-0031
-Title: Invite Feature and Visibility Layout Fix
+Task ID: T-0032
+Title: Enhanced Transcription Subtitles and Audio Mixing
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 23:45
-Last updated: 2026-01-01 23:47
+Created: 2026-01-01 23:58
+Last updated: 2026-01-02 00:00
 
 START LOG
 
-Timestamp: 2026-01-01 23:45
+Timestamp: 2026-01-01 23:58
 Current behavior or state:
 
-- Controls cover bottom of shared screen (`pb-4`).
-- No Invite button.
+- Transcription centered.
+- Audio mixing logic already robust (mic + system/remote).
 
 Plan and scope for this task:
 
-- Restore padding to `pb-24` to avoid overlap.
-- Add Invite button (UserPlus) with clipboard copy and toast.
+- Update UI to "Left-Aligned Horizontal Subtitle" style.
+- Ensure container is wide enough.
+- Verify audio mixing logic matches "any shared audio" requirement.
 
 Files or modules expected to change:
 
-- components/MeetingRoom.tsx
+- components/Transcription.tsx
 
 Risks or things to watch out for:
 
@@ -37,15 +38,15 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 23:47
+Timestamp: 2026-01-02 00:00
 Summary of what actually changed:
 
-- Changed layout padding.
-- Added Invite button logic and UI.
+- Changed caption style to left-aligned, wide container.
+- Increased background contrast.
 
 Files actually modified:
 
-- components/MeetingRoom.tsx
+- components/Transcription.tsx
 
 How it was tested:
 
