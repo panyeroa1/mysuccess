@@ -1,26 +1,27 @@
-Task ID: T-0019
-Title: Refactor Inline Styles
+Task ID: T-0020
+Title: Fix Transcription Visibility & Audio Source Update
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 21:35
-Last updated: 2026-01-01 21:37
+Created: 2026-01-01 21:50
+Last updated: 2026-01-01 21:52
 
 START LOG
 
-Timestamp: 2026-01-01 21:35
+Timestamp: 2026-01-01 21:50
 Current behavior or state:
 
-- IDE warning about inline styles in `Transcription.tsx` for the text shadow.
+- User reports transcription "no longer seen".
+- `audioSource` prop changes were not triggering a restart of `startDeepgram`.
+- Z-index might have been too low (`z-50`) compared to new UI elements (`z-20` but complex stacking).
 
 Plan and scope for this task:
 
-- Move the complex `text-shadow` style to `app/globals.css` as `.videoke-caption`.
-- Update `Transcription.tsx` to use this class.
+- Update `Translation.tsx` `useEffect` to depend on `[deviceId, audioSource]`.
+- Increase `z-index` to `z-[100]`.
 
 Files or modules expected to change:
 
-- app/globals.css
 - components/Transcription.tsx
 
 Risks or things to watch out for:
@@ -37,21 +38,20 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 21:37
+Timestamp: 2026-01-01 21:52
 Summary of what actually changed:
 
-- Added `.videoke-caption` to `app/globals.css`.
-- Removed inline style from `Transcription.tsx` and applied the class.
+- Merged `useEffect` hooks in `Transcription.tsx` to handle `audioSource` and `deviceId` changes correctly (triggering `stopDeepgram` then `startDeepgram`).
+- Increased container `z-index` to `100`.
 
 Files actually modified:
 
-- app/globals.css
 - components/Transcription.tsx
 
 How it was tested:
 
 - Code review.
-- Build test (push to main).
+- Push to build.
 
 Test result:
 

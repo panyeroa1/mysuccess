@@ -213,21 +213,12 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource }:
       stopDeepgram();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Effect to handle device switching if already active
-  useEffect(() => {
-    if (deviceId && deepgramRef.current) {
-        stopDeepgram();
-        setTimeout(() => startDeepgram(), 500);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deviceId]);
+  }, [deviceId, audioSource]); // Restart when device or source changes
 
   if (!transcriptDisplay) return null;
 
   return (
-    <div className="fixed bottom-[100px] left-0 w-full flex justify-center pointer-events-none z-50 px-4">
+    <div className="fixed bottom-[100px] left-0 w-full flex justify-center pointer-events-none z-[100] px-4">
         <div 
           className="videoke-caption text-yellow-300 text-3xl font-bold text-center drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/40 px-6 py-4 rounded-xl backdrop-blur-sm transition-all duration-100"
         >
