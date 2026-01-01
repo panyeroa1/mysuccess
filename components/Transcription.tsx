@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 
 import { translateText, detectLanguage } from "@/actions/translate";
 
@@ -28,7 +27,6 @@ const Transcription = ({
   sttEngine,
 }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
-  const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -36,6 +34,7 @@ const Transcription = ({
   const speechRecognitionRef = useRef<any>(null);
   const webSpeechActiveRef = useRef(false);
   const fastWhisperBusyRef = useRef(false);
+  const deepgramBusyRef = useRef(false);
 
   const cloneAudioStream = (source?: MediaStream | null): MediaStream | null => {
     const track = source
@@ -96,6 +95,33 @@ const Transcription = ({
       return null;
     } finally {
       fastWhisperBusyRef.current = false;
+    }
+  };
+
+  const sendToDeepgram = async (blob: Blob) => {
+    if (deepgramBusyRef.current) return null;
+    deepgramBusyRef.current = true;
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, "audio.webm");
+
+      const response = await fetch("/api/stt/deepgram", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error("Deepgram request failed", response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data?.text ?? null;
+    } catch (error) {
+      console.error("Deepgram REST error:", error);
+      return null;
+    } finally {
+      deepgramBusyRef.current = false;
     }
   };
 
@@ -192,79 +218,82 @@ const Transcription = ({
     }
   };
 
+  const deepgramWsRef = useRef<WebSocket | null>(null);
+
   const startDeepgram = async () => {
     try {
-      const apiKey = process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY;
-      if (!apiKey) {
-        console.error("Deepgram API Key missing");
-        return;
-      }
-
       const stream = await getAudioStream();
       if (!stream) return;
       
       streamRef.current = stream;
 
-      if (!MediaRecorder.isTypeSupported("audio/webm")) {
-        console.warn("Browser does not support audio/webm");
+      // Get WebSocket connection info from our API
+      const configRes = await fetch("/api/stt/deepgram-stream?model=nova-3&language=multi");
+      if (!configRes.ok) {
+        console.error("Failed to get Deepgram config");
+        return;
       }
+      const { url, token } = await configRes.json();
 
-      const microphone = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      microphoneRef.current = microphone;
+      // Create WebSocket connection to Deepgram
+      const ws = new WebSocket(url, ["token", token]);
+      deepgramWsRef.current = ws;
 
-      const deepgram = createClient(apiKey);
-      
-      const connection = deepgram.listen.live({
-        model: "nova-3",
-        language: "multi",
-        smart_format: true,
-        diarize: true,
-        utterance_end_ms: 1000,
-      });
+      ws.onopen = () => {
+        console.log("Deepgram WebSocket connected");
 
-      deepgramRef.current = connection;
+        // Set up audio processing for raw PCM (linear16)
+        const audioContext = new AudioContext({ sampleRate: 16000 });
+        audioContextRef.current = audioContext;
 
-      connection.on(LiveTranscriptionEvents.Open, () => {
-        microphone.addEventListener("dataavailable", (event) => {
-          if (event.data.size > 0 && connection.getReadyState() === 1) {
-            connection.send(event.data);
+        const source = audioContext.createMediaStreamSource(stream);
+        const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+        processor.onaudioprocess = (e) => {
+          if (ws.readyState !== WebSocket.OPEN) return;
+
+          const inputData = e.inputBuffer.getChannelData(0);
+          const pcmData = new Int16Array(inputData.length);
+          
+          for (let i = 0; i < inputData.length; i++) {
+            const s = Math.max(-1, Math.min(1, inputData[i]));
+            pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
           }
-        });
 
-        microphone.start(250);
-      });
+          ws.send(pcmData.buffer);
+        };
 
-      connection.on(LiveTranscriptionEvents.Transcript, async (data) => {
-        const alternative = data.channel.alternatives[0];
-        if (alternative && alternative.transcript) {
-           const text = alternative.transcript;
-           
-           if (data.is_final) {
-             await handleFinalTranscript(text);
-           } else {
-             // Interim result: Show live "typing" effect
-             // If we are translating, we still show the source text while speaking because we can't translate live easily without lag
-             // User sees what they say, then it snaps to translation on pause.
-             handleInterimTranscript(text);
-           }
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+      };
+
+      ws.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const transcript = data?.channel?.alternatives?.[0]?.transcript;
+          
+          if (transcript) {
+            if (data.is_final) {
+              await handleFinalTranscript(transcript);
+            } else {
+              handleInterimTranscript(transcript);
+            }
+          }
+        } catch (err) {
+          console.error("Error parsing Deepgram response", err);
         }
-      });
+      };
 
-      connection.on(LiveTranscriptionEvents.Close, () => {
-        // console.log("Deepgram connection closed");
-      });
+      ws.onerror = (error) => {
+        console.error("Deepgram WebSocket error", error);
+      };
 
-      connection.on(LiveTranscriptionEvents.Error, (err) => {
-        console.error("Deepgram error", err);
-      });
+      ws.onclose = () => {
+        console.log("Deepgram WebSocket closed");
+      };
 
     } catch (error) {
-      console.error("Failed to start Deepgram", error);
-      // Feedback to user
-      const msg = error instanceof Error ? error.message : "Connection failed";
-      // We can't use toast here easily without importing it or passing it in.
-      // Ideally we pass toast as prop or use console.
-      console.warn("Transcription Check: Deepgram failed to start.", msg);
+      console.error("Failed to start Deepgram streaming", error);
     }
   };
 
@@ -382,9 +411,9 @@ const Transcription = ({
         speechRecognitionRef.current = null;
     }
 
-    if (deepgramRef.current) {
-        deepgramRef.current.finish(); 
-        deepgramRef.current = null;
+    if (deepgramWsRef.current) {
+        deepgramWsRef.current.close();
+        deepgramWsRef.current = null;
     }
   };
 

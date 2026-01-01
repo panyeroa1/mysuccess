@@ -59,6 +59,11 @@
   background-color: #000;
 }
 
+.str-video__participant-view {
+  max-width: none;
+  width: 100%;
+}
+
 .str-video__speaker-layout .str-video__participant-view {
   aspect-ratio: auto;
   height: 100%;
