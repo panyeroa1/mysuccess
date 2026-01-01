@@ -13,9 +13,10 @@ interface TranscriptionProps {
   targetLang: string;
   audioSource: "microphone" | "system" | "both";
   screenShareAudioStream?: MediaStream | null;
+  speakerAudioStream?: MediaStream | null;
 }
 
-const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, screenShareAudioStream }: TranscriptionProps) => {
+const Transcription = ({ userId, meetingId, deviceId, targetLang, audioSource, screenShareAudioStream, speakerAudioStream }: TranscriptionProps) => {
   const [transcriptDisplay, setTranscriptDisplay] = useState("");
   const deepgramRef = useRef<any>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
