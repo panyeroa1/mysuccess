@@ -1,30 +1,32 @@
-Task ID: T-0027
-Title: Fix useScreenShareState Return Type Usage
+Task ID: T-0028
+Title: Improve Screen Share Visibility (Full & Contain)
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:58
-Last updated: 2026-01-01 23:00
+Created: 2026-01-01 23:10
+Last updated: 2026-01-01 23:12
 
 START LOG
 
-Timestamp: 2026-01-01 22:58
+Timestamp: 2026-01-01 23:10
 Current behavior or state:
 
-- Type error: `isScreenSharing` property does not exist.
+- Shared screen is "covered blurry" (likely `object-fit: cover` cropping content).
+- Layout padding (`pb-28`) wastes screen space ("visible full" requested).
 
 Plan and scope for this task:
 
-- Destructure `status` and `mediaStream` from `useScreenShareState`.
-- Derive computed properties.
+- Force `object-fit: contain` for videos in `globals.css`.
+- Reduce `MeetingRoom.tsx` padding to maximize view.
 
 Files or modules expected to change:
 
+- app/globals.css
 - components/MeetingRoom.tsx
 
 Risks or things to watch out for:
 
-- None.
+- Camera feeds will also be "contained" (letterboxed), which is generally acceptable for avoiding specific cropping issues.
 
 WORK CHECKLIST
 
@@ -36,13 +38,15 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 23:00
+Timestamp: 2026-01-01 23:12
 Summary of what actually changed:
 
-- Updated destructuring of `useScreenShareState`.
+- Added `.str-video__video { object-fit: contain !important; }` to globals.
+- Reduced bottom padding in `MeetingRoom.tsx`.
 
 Files actually modified:
 
+- app/globals.css
 - components/MeetingRoom.tsx
 
 How it was tested:

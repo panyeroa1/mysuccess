@@ -86,7 +86,7 @@ const MeetingRoom = () => {
     <section className="relative h-screen w-full overflow-hidden bg-[#0b0f14] text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(99,102,241,0.12),_transparent_40%)]" />
       <div className="relative flex size-full">
-        <div className="relative flex size-full items-center justify-center px-4 pb-28 pt-4">
+        <div className="relative flex size-full items-center justify-center px-4 pb-4 pt-4">
           <div className="relative size-full overflow-hidden rounded-2xl border border-white/10 bg-[#0f141c]/80 shadow-[0_24px_70px_rgba(0,0,0,0.55)]">
             <CallLayout />
           </div>
