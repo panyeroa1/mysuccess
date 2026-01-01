@@ -32,7 +32,9 @@ const Transcription = ({
   sttEngine,
   onFinalTranscript,
 }: TranscriptionProps) => {
-  const [transcriptDisplay, setTranscriptDisplay] = useState("");
+  const [finalTranscripts, setFinalTranscripts] = useState<string[]>([]);
+  const [interimTranscript, setInterimTranscript] = useState("");
+  const clearTimerRef = useRef<NodeJS.Timeout | null>(null);
   const microphoneRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -43,6 +45,14 @@ const Transcription = ({
   const deepgramBusyRef = useRef(false);
   const transcriptRowRef = useRef<string | null>(null);
   const transcriptBufferRef = useRef({ original: "", translated: "" });
+
+  const resetClearTimer = () => {
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    clearTimerRef.current = setTimeout(() => {
+      setFinalTranscripts([]);
+      setInterimTranscript("");
+    }, 8000); // Clear after 8 seconds of silence
+  };
 
   const appendTranscript = (current: string, next: string) => {
     const trimmed = next.trim();
@@ -78,13 +88,16 @@ const Transcription = ({
       if (tx) translated = tx;
     }
 
-    setTranscriptDisplay(translated);
+    setFinalTranscripts((prev) => [...prev.slice(-2), translated]);
+    setInterimTranscript("");
+    resetClearTimer();
     await saveTranscript(text, translated, detectedLang);
   };
 
   const handleInterimTranscript = (text: string) => {
     if (!text || text.trim().length === 0) return;
-    setTranscriptDisplay(text);
+    setInterimTranscript(text);
+    resetClearTimer();
   };
 
   const sendToFastWhisper = async (blob: Blob) => {
@@ -524,24 +537,33 @@ const Transcription = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceId, audioSource, screenShareAudioStream, speakerAudioStream, sttEngine]); // Restart when device or source changes
 
-  if (!transcriptDisplay) return null;
-
-  const hasEmphasis = transcriptDisplay.includes("!") || transcriptDisplay.toUpperCase() === transcriptDisplay && transcriptDisplay.length > 5;
-  const isQuestion = transcriptDisplay.includes("?");
+  if (finalTranscripts.length === 0 && !interimTranscript) return null;
 
   return (
-    <div className="fixed bottom-20 left-0 z-[100] flex w-full justify-center px-3 pointer-events-none sm:bottom-[110px] sm:px-4">
-      <div 
-        className={`videoke-caption max-w-[95vw] rounded-md px-3 py-2 text-left text-[14px] leading-snug drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-300 sm:max-w-5xl ${
-          hasEmphasis 
-            ? "bg-red-600/80 text-white font-bold scale-110 animate-pulse" 
-            : isQuestion
-            ? "bg-blue-600/80 text-white font-medium italic"
-            : "bg-black/60 text-yellow-300 font-light"
-        }`}
-      >
-        {transcriptDisplay}
-      </div>
+    <div className="fixed bottom-20 left-0 z-[100] flex w-full flex-col items-center justify-center px-3 pointer-events-none sm:bottom-[110px] sm:px-4 gap-2">
+      {finalTranscripts.map((text, idx) => {
+        const hasEmphasis = text.includes("!") || (text.toUpperCase() === text && text.length > 5);
+        const isQuestion = text.includes("?");
+        return (
+          <div 
+            key={idx}
+            className={`videoke-caption max-w-[95vw] rounded-md px-3 py-2 text-left text-[14px] leading-snug drop-shadow-[0_2px_2px_rgba(0,0,0,1)] backdrop-blur-md transition-all duration-300 sm:max-w-5xl ${
+              hasEmphasis 
+                ? "bg-red-600/80 text-white font-bold scale-110" 
+                : isQuestion
+                ? "bg-blue-600/80 text-white font-medium italic"
+                : "bg-black/60 text-yellow-300 font-light"
+            }`}
+          >
+            {text}
+          </div>
+        );
+      })}
+      {interimTranscript && (
+        <div className="videoke-caption max-w-[95vw] rounded-md bg-black/40 px-3 py-1 text-left text-[13px] font-light italic leading-snug text-yellow-100/80 drop-shadow-[0_1px_1px_rgba(0,0,0,1)] backdrop-blur-sm sm:max-w-5xl">
+          {interimTranscript}...
+        </div>
+      )}
     </div>
   );
 };

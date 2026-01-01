@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { languages } from "@/constants/languages";
 import { Volume2, VolumeX } from "lucide-react";
 
@@ -67,12 +67,11 @@ const TranslatorPanel = ({
       audio.play().catch(() => resolve());
     });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const processQueue = async () => {
-    if (processingRef.current) return;
+  const processQueue = useCallback(async () => {
+    if (processingRef.current || !autoTranslate) return;
     processingRef.current = true;
 
-    while (queueRef.current.length > 0) {
+    while (queueRef.current.length > 0 && autoTranslate) {
       const sentence = queueRef.current.shift()?.trim();
       if (!sentence) continue;
 
@@ -123,6 +122,7 @@ const TranslatorPanel = ({
           const blob = await ttsResponse.blob();
           await playAudio(blob);
         } else {
+          console.error("TTS Response Error:", ttsResponse.status);
           setItems((prev) =>
             prev.map((item) =>
               item.id === id ? { ...item, status: "error" } : item
@@ -140,7 +140,7 @@ const TranslatorPanel = ({
     }
 
     processingRef.current = false;
-  };
+  }, [selectedLang, autoTranslate]);
 
   useEffect(() => {
     if (targetLang && targetLang !== selectedLang) {

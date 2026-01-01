@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
   deepgramUrl.searchParams.set("interim_results", "true");
   deepgramUrl.searchParams.set("filler_words", "true");
   deepgramUrl.searchParams.set("utterance_end_ms", "1500");
+  deepgramUrl.searchParams.set("endpointing", "300");
+  deepgramUrl.searchParams.set("no_delay", "true");
+  deepgramUrl.searchParams.set("numerals", "true");
   deepgramUrl.searchParams.set("encoding", "linear16");
   deepgramUrl.searchParams.set("sample_rate", "16000");
 
