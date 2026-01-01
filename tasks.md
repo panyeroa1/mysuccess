@@ -1,34 +1,32 @@
-Task ID: T-0015
-Title: Auto Language Detection
+Task ID: T-0016
+Title: Implement Videoke Style Captions
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 21:00
-Last updated: 2026-01-01 21:05
+Created: 2026-01-01 21:10
+Last updated: 2026-01-01 21:12
 
 START LOG
 
-Timestamp: 2026-01-01 21:00
+Timestamp: 2026-01-01 21:10
 Current behavior or state:
 
-- Transcription assumes "auto" language or uses source language, but we don't capture the specific code.
-- User wants auto-detection of spoken language.
-- Deepgram Live API doesn't return detected language in metadata.
+- Captions are a single scrolling line in a small pill container.
+- User requested "Videoke type" (Karaoke).
 
 Plan and scope for this task:
 
-- Implement `detectLanguage` server action using Ollama (`gpt-oss-120b`).
-- Update `Transcription.tsx` to call this action for final transcripts.
-- Save detected language to `source_lang` in Supabase.
+- Handle `interim` results from Deepgram to show text *as it is spoken* (typing effect).
+- Style the captions to look like Karaoke: Large, Yellow, with Black Outline/Shadow.
+- Remove the "scrolling" logic and just show the current active utterance.
 
 Files or modules expected to change:
 
-- actions/translate.ts
 - components/Transcription.tsx
 
 Risks or things to watch out for:
 
-- Latency: Adding another LLM call per sentence might delay the UI update or database insert slightly.
+- Translation latency means the text might "snap" from Source Language (while speaking) to Target Language (when sentence ends). This is expected behavior for live translation.
 
 WORK CHECKLIST
 
@@ -40,21 +38,21 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 21:05
+Timestamp: 2026-01-01 21:12
 Summary of what actually changed:
 
-- Added `detectLanguage` function to `actions/translate.ts` which asks Ollama to identify the ISO 639-1 code of the text.
-- Integrated this detection into `Transcription.tsx` so every final transcript text is analyzed, and the result is saved as `source_lang`.
+- Updated `Transcription.tsx`:
+    - Logic: Now updates state on `!is_final` events (interim).
+    - Styling: Changed container to be larger, transparent black background with blur, and text to be `text-yellow-300` `text-3xl` `font-bold` with a heavy black text shadow.
 
 Files actually modified:
 
-- actions/translate.ts
 - components/Transcription.tsx
 
 How it was tested:
 
-- Code review.
-- Build test (git push).
+- Code review of styles and logic.
+- Push to build.
 
 Test result:
 
@@ -62,4 +60,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- Detecting language on very short phrases (e.g., "Hello") might default to "en" or be ambiguous.
+- None

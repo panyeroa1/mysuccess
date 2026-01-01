@@ -78,16 +78,15 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
                 if (tx) translated = tx;
              }
              
-             // Keep only the last ~100 characters for the "single line" feel
-             setTranscriptDisplay((prev) => {
-                 const newText = prev + " " + (targetLang && targetLang !== detectedLang ? translated : text);
-                 return newText.slice(-100); 
-             });
+             // Final result: Show it clearly (maybe clear after a delay or keep until next)
+             setTranscriptDisplay(translated);
              
              await saveTranscript(text, translated, detectedLang);
            } else {
-             // Optional: Show interim results for smoother "streaming" feel
-             // setTranscriptDisplay((prev) => (prev + " " + text).slice(-100));
+             // Interim result: Show live "typing" effect
+             // If we are translating, we still show the source text while speaking because we can't translate live easily without lag
+             // User sees what they say, then it snaps to translation on pause.
+             setTranscriptDisplay(text);
            }
         }
       });
@@ -116,14 +115,14 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
     }
   };
 
-  const saveTranscript = async (original: string, translated: string) => {
+  const saveTranscript = async (original: string, translated: string, sourceLang: string) => {
     if (!original || original.trim().length === 0) return;
     
     try {
       await supabase.from("translations").insert({
         user_id: userId,
         meeting_id: meetingId,
-        source_lang: "auto", 
+        source_lang: sourceLang || "auto", 
         target_lang: targetLang || "en",
         original_text: original,
         translated_text: translated, 
@@ -153,8 +152,11 @@ const Transcription = ({ userId, meetingId, deviceId, targetLang }: Transcriptio
   if (!transcriptDisplay) return null;
 
   return (
-    <div className="fixed bottom-[90px] left-0 w-full flex justify-center pointer-events-none z-50">
-        <div className="bg-black/60 px-6 py-2 rounded-full text-white text-lg font-medium whitespace-nowrap overflow-hidden max-w-[80%] text-center shadow-lg backdrop-blur-sm">
+    <div className="fixed bottom-[100px] left-0 w-full flex justify-center pointer-events-none z-50 px-4">
+        <div 
+          className="text-yellow-300 text-3xl font-bold text-center drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/40 px-6 py-4 rounded-xl backdrop-blur-sm transition-all duration-100"
+          style={{ textShadow: "2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000" }}
+        >
             {transcriptDisplay}
         </div>
     </div>
