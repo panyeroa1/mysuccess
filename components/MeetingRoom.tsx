@@ -14,7 +14,7 @@ import {
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { languages } from "@/constants/languages";
-import { Users, LayoutList, Languages, Captions } from "lucide-react";
+import { Users, LayoutList, Languages, Captions, Globe } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -101,6 +101,25 @@ const MeetingRoom = () => {
         >
           <div className="h-full rounded-2xl border border-white/10 bg-[#0f141c]/90 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
             <CallParticipantsList onClose={() => setShowParticipants(false)} />
+          </div>
+        </div>
+
+        {/* Translator Sidebar */}
+        <div
+          className={cn(
+            "pointer-events-auto absolute right-4 top-4 bottom-24 hidden w-[400px] max-w-[90vw]",
+            {
+              "show-block": showTranslator,
+            }
+          )}
+        >
+          <div className="h-full rounded-2xl border border-white/10 bg-[#0f141c]/90 overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
+             <iframe 
+                src="https://eburon.ai/classroom/" 
+                className="w-full h-full border-none"
+                allow="autoplay; microphone; camera; display-capture; fullscreen"
+                title="Eburon Classroom"
+             />
           </div>
         </div>
       </div>

@@ -1,33 +1,32 @@
-Task ID: T-0022
-Title: Auto Detect Device Media
+Task ID: T-0023
+Title: Implementation of Translator Sidebar (Eburon Classroom)
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:15
-Last updated: 2026-01-01 22:17
+Created: 2026-01-01 22:30
+Last updated: 2026-01-01 22:33
 
 START LOG
 
-Timestamp: 2026-01-01 22:15
+Timestamp: 2026-01-01 22:30
 Current behavior or state:
 
-- User has to manually switch to "Both" or "System Audio" which triggers a second permission prompt.
-- User requested "auto detect device media".
+- No in-app translation/videoke tool integration.
+- User requested embedding `https://eburon.ai/classroom/`.
 
 Plan and scope for this task:
 
-- Use `useLocalParticipant().screenShareAudioStream` to access existing share stream.
-- Auto-switch `audioSource` to "both" when sharing starts.
-- Fallback to manual prompt if stream is not sharing.
+- Add sidebar with iframe to `MeetingRoom.tsx`.
+- Add toggle button (Globe).
+- Ensure it toggles exclusively with Participants list.
 
 Files or modules expected to change:
 
 - components/MeetingRoom.tsx
-- components/Transcription.tsx
 
 Risks or things to watch out for:
 
-- Requires "Share Audio" to be checked during screen share for the stream to have audio tracks.
+- Iframe permissions (autoplay, mic, camera) must be explicit.
 
 WORK CHECKLIST
 
@@ -39,15 +38,15 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 22:17
+Timestamp: 2026-01-01 22:33
 Summary of what actually changed:
 
-- `MeetingRoom.tsx`: Added `useLocalParticipant` and effect to auto-switch source to "both" when sharing. Passes `screenShareAudioStream` to `Transcription`.
-- `Transcription.tsx`: Updated `getAudioStream` to prefer `screenShareAudioStream` over `getDisplayMedia`, enabling seamless mixing.
+- Added `showTranslator` state and Globe icon button.
+- Implemented right-side sidebar showing `https://eburon.ai/classroom/`.
+- Configured toggles to close one sidebar when opening the other.
 
 Files actually modified:
 
-- components/Transcription.tsx
 - components/MeetingRoom.tsx
 
 How it was tested:
