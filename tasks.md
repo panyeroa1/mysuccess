@@ -1,22 +1,25 @@
-Task ID: T-0024
-Title: Fix Syntax Errors in MeetingRoom.tsx
+Task ID: T-0025
+Title: Fix MeetingRoom.tsx Logic Errors
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 22:40
-Last updated: 2026-01-01 22:42
+Created: 2026-01-01 22:50
+Last updated: 2026-01-01 22:52
 
 START LOG
 
-Timestamp: 2026-01-01 22:40
+Timestamp: 2026-01-01 22:50
 Current behavior or state:
 
-- Syntax error in `MeetingRoom.tsx` (duplicate `import {`).
+- `useLocalParticipant` import error.
+- `showTranslator` state missing.
+- Globe button missing.
 
 Plan and scope for this task:
 
-- Remove duplicate import line.
-- Restore missing `useLocalParticipant` import.
+- Fix hook imports (destructure from `useCallStateHooks`).
+- Add missing state.
+- Add missing button UI.
 
 Files or modules expected to change:
 
@@ -36,11 +39,11 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 22:42
+Timestamp: 2026-01-01 22:52
 Summary of what actually changed:
 
-- Fixed malformed import block.
-- Re-added `useLocalParticipant`.
+- Corrected `useLocalParticipant` usage.
+- Re-added `showTranslator` state and toggle button.
 
 Files actually modified:
 

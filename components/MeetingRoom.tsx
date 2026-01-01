@@ -10,7 +10,6 @@ import {
   SpeakerLayout,
   useCallStateHooks,
   useCall,
-  useLocalParticipant,
 } from "@stream-io/video-react-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { languages } from "@/constants/languages";
@@ -38,11 +37,11 @@ const MeetingRoom = () => {
   const router = useRouter();
   const [layout, setLayout] = useState<CallLayoutType>("speaker-left");
   const [showParticipants, setShowParticipants] = useState(false);
+  const [showTranslator, setShowTranslator] = useState(false);
   const [showCaptions, setShowCaptions] = useState(false);
   const [audioSource, setAudioSource] = useState<"microphone" | "system" | "both">("microphone");
   const [targetLang, setTargetLang] = useState("en");
-  const { useCallCallingState } = useCallStateHooks();
-  const { useMicrophoneState } = useCallStateHooks();
+  const { useCallCallingState, useMicrophoneState, useLocalParticipant } = useCallStateHooks();
   const { selectedDevice } = useMicrophoneState();
   const { user } = useUser();
   const call = useCall();
