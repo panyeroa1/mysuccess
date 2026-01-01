@@ -68,6 +68,34 @@ const MeetingRoom = () => {
     activeSpeaker?.screenShareAudioStream ?? activeSpeaker?.audioStream ?? null;
   const { user } = useUser();
   const call = useCall();
+  const [showControls, setShowControls] = useState(true);
+
+  // Auto-hide controls after 10 seconds of inactivity
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      setShowControls(true);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setShowControls(false);
+      }, 10000); // 10 seconds
+    };
+
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("click", resetTimer);
+    window.addEventListener("keydown", resetTimer);
+
+    // Initialize timer
+    resetTimer();
+
+    return () => {
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("click", resetTimer);
+      window.removeEventListener("keydown", resetTimer);
+      clearTimeout(timeoutId);
+    };
+  }, []);
   
   const amISharing = screenShareStatus === "enabled";
   // amISharing derived logic provided in useEffect below is sufficient
@@ -177,7 +205,12 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
       )}
 
       {/* video layout and call controls */}
-      <div className="fixed bottom-4 left-1/2 z-20 flex w-[min(1100px,95vw)] -translate-x-1/2 flex-wrap items-center justify-center gap-3 rounded-2xl border border-white/10 bg-[#0f141c]/80 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
+      <div 
+        className={cn(
+            "fixed bottom-0 left-0 z-50 flex h-[55px] w-full items-center justify-center gap-3 border-t border-white/10 bg-[#0f141c] px-4 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transition-transform duration-300",
+            !showControls && "translate-y-full"
+        )}
+      >
         <CallControls onLeave={() => router.push(`/`)} />
 
         <DropdownMenu>

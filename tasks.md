@@ -1,23 +1,23 @@
-Task ID: T-0033
-Title: Fix Layout Padding and Restore useEffect
+Task ID: T-0035
+Title: Sticky Footer and Auto-Hide Controls
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-02 00:08
-Last updated: 2026-01-02 00:10
+Created: 2026-01-02 00:25
+Last updated: 2026-01-02 00:27
 
 START LOG
 
-Timestamp: 2026-01-02 00:08
+Timestamp: 2026-01-02 00:25
 Current behavior or state:
 
-- Layout has "ugly" margins (`px-4`).
-- `useEffect` missing from imports.
+- Controls floating at bottom.
+- Always visible.
 
 Plan and scope for this task:
 
-- Remove padding from `MeetingRoom.tsx` layout container.
-- Restore `useEffect` import.
+- Convert to sticky footer.
+- Add 10s auto-hide.
 
 Files or modules expected to change:
 
@@ -37,11 +37,11 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-02 00:10
+Timestamp: 2026-01-02 00:27
 Summary of what actually changed:
 
-- Removed side/top margins for full-width view.
-- Fixed TS error.
+- Implemented full-width sticky footer.
+- Added 10s inactivity auto-hide.
 
 Files actually modified:
 
