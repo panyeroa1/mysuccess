@@ -1,25 +1,27 @@
-Task ID: T-0029
-Title: Fix Transcription Props Error
+Task ID: T-0031
+Title: Invite Feature and Visibility Layout Fix
 Status: DONE
 Owner: Miles
 Related repo: Zoom-Clone
-Created: 2026-01-01 23:25
-Last updated: 2026-01-01 23:27
+Created: 2026-01-01 23:45
+Last updated: 2026-01-01 23:47
 
 START LOG
 
-Timestamp: 2026-01-01 23:25
+Timestamp: 2026-01-01 23:45
 Current behavior or state:
 
-- Type error in `MeetingRoom.tsx`: `speakerAudioStream` property does not exist on `TranscriptionProps`.
+- Controls cover bottom of shared screen (`pb-4`).
+- No Invite button.
 
 Plan and scope for this task:
 
-- Add `speakerAudioStream` to `Transcription.tsx` interface.
+- Restore padding to `pb-24` to avoid overlap.
+- Add Invite button (UserPlus) with clipboard copy and toast.
 
 Files or modules expected to change:
 
-- components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 Risks or things to watch out for:
 
@@ -35,14 +37,15 @@ WORK CHECKLIST
 
 END LOG
 
-Timestamp: 2026-01-01 23:27
+Timestamp: 2026-01-01 23:47
 Summary of what actually changed:
 
-- Added `speakerAudioStream` to `TranscriptionProps`.
+- Changed layout padding.
+- Added Invite button logic and UI.
 
 Files actually modified:
 
-- components/Transcription.tsx
+- components/MeetingRoom.tsx
 
 How it was tested:
 
@@ -55,4 +58,4 @@ Test result:
 
 Known limitations or follow-up tasks:
 
-- The `speakerAudioStream` prop is currently accepted but not actively used in the audio mixing logic.
+- None
