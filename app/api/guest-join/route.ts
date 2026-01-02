@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   const client = new StreamClient(apiKey, apiSecret);
-  const { calls } = await client.queryCalls({
+  const { calls } = await client.video.queryCalls({
     filter_conditions: {
       custom: {
         join_code: code,
@@ -68,12 +68,11 @@ export async function POST(req: Request) {
   }
 
   const userId = `guest_${code.toLowerCase()}_${randomUUID()}`;
-  await client.upsertUsers([
-    {
-      id: userId,
-      name,
+  await client.upsertUsers({
+    users: {
+      [userId]: { id: userId, name },
     },
-  ]);
+  });
 
   const exp = Math.round(Date.now() / 1000) + 60 * 60;
   const issued = Math.floor(Date.now() / 1000) - 60;

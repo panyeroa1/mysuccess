@@ -4,6 +4,7 @@ import { StreamClient, StreamVideoClient } from "@stream-io/node-sdk";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const streamApiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 const streamApiSecret = process.env.STREAM_SECRET_KEY;
@@ -161,7 +162,7 @@ export async function POST(req: Request) {
           const { error: insertError } = await supabaseAdmin
             .from("recordings")
             .insert({
-              owner_id: callInfo.created_by?.id ?? callInfo.created_by_id ?? "",
+              owner_id: callInfo.created_by?.id ?? "",
               call_id: id,
               call_type: type,
               title,
