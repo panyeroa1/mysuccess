@@ -103,6 +103,8 @@ const MeetingRoom = () => {
     if (localParticipant?.isSpeaking) return localUserId;
     return localUserId;
   })();
+  const isLocalAudioSource =
+    !!localUserId && resolvedSpeakerId === localUserId;
 
   const pushTranscriptSentences = (text: string) => {
     const trimmed = text.trim();
@@ -255,6 +257,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
               onToggleMicMeeting={() => call?.microphone.toggle()}
               isMicMutedForSTT={isMicMutedForSTT}
               onToggleMicSTT={() => setIsMicMutedForSTT((prev) => !prev)}
+              disablePlayback={isLocalAudioSource}
             />
           </div>
         </div>

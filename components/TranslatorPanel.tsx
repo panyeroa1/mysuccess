@@ -3,6 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { languages } from "@/constants/languages";
 import { Volume2, VolumeX, Mic, MicOff, MessageSquare, MessageSquareOff } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
 
 type TranslatorPanelProps = {
   sentences: string[];
@@ -12,6 +21,7 @@ type TranslatorPanelProps = {
   onToggleMicMeeting?: () => void;
   isMicMutedForSTT?: boolean;
   onToggleMicSTT?: () => void;
+  disablePlayback?: boolean;
 };
 
 type TranslationItem = {
@@ -34,6 +44,7 @@ const TranslatorPanel = ({
   onToggleMicMeeting,
   isMicMutedForSTT = false,
   onToggleMicSTT,
+  disablePlayback = false,
 }: TranslatorPanelProps) => {
   const [selectedLang, setSelectedLang] = useState(targetLang || "en");
   const [autoTranslate, setAutoTranslate] = useState(false);
@@ -41,6 +52,7 @@ const TranslatorPanel = ({
   const [stickToBottom, setStickToBottom] = useState(true);
   const [isMeetingMuted, setIsMeetingMuted] = useState(false);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
+  const [showSpeakerNote, setShowSpeakerNote] = useState(false);
   const queueRef = useRef<string[]>([]);
   const processingRef = useRef(false);
   const lastIndexRef = useRef(0);
@@ -53,40 +65,47 @@ const TranslatorPanel = ({
     onLanguageChange(newLang);
   };
 
-  const playAudio = useCallback(async (blob: Blob) =>
-    new Promise<void>((resolve) => {
-      const url = URL.createObjectURL(blob);
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-      const audio = new Audio(url);
-      audio.preload = "auto";
-      audio.muted = false;
-      audio.volume = voiceVolume;
-      audioRef.current = audio;
+  const playAudio = useCallback(
+    async (blob: Blob) =>
+      new Promise<void>((resolve) => {
+        if (disablePlayback) {
+          resolve();
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = "";
+        }
+        const audio = new Audio(url);
+        audio.preload = "auto";
+        audio.muted = false;
+        audio.volume = voiceVolume;
+        audioRef.current = audio;
 
-      // Dispatch event to prevent feedback loop
-      window.dispatchEvent(new CustomEvent("ai-speaking-start"));
+        // Dispatch event to prevent feedback loop
+        window.dispatchEvent(new CustomEvent("ai-speaking-start"));
 
-      audio.onended = () => {
-        // 500ms cooldown to account for reverb/echo tail
-        setTimeout(() => {
+        audio.onended = () => {
+          // 500ms cooldown to account for reverb/echo tail
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent("ai-speaking-end"));
+            URL.revokeObjectURL(url);
+            resolve();
+          }, 500);
+        };
+        audio.onerror = () => {
           window.dispatchEvent(new CustomEvent("ai-speaking-end"));
           URL.revokeObjectURL(url);
           resolve();
-        }, 500);
-      };
-      audio.onerror = () => {
-        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
-        URL.revokeObjectURL(url);
-        resolve();
-      };
-      audio.play().catch(() => {
-        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
-        resolve();
-      });
-    }), [voiceVolume]);
+        };
+        audio.play().catch(() => {
+          window.dispatchEvent(new CustomEvent("ai-speaking-end"));
+          resolve();
+        });
+      }),
+    [disablePlayback, voiceVolume]
+  );
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || !autoTranslate) return;
@@ -135,6 +154,10 @@ const TranslatorPanel = ({
         )
       );
 
+      if (disablePlayback) {
+        continue;
+      }
+
       try {
         const ttsResponse = await fetch("/api/tts/cartesia", {
           method: "POST",
@@ -165,7 +188,7 @@ const TranslatorPanel = ({
 
     processingRef.current = false;
     window.dispatchEvent(new CustomEvent("ai-sequence-end"));
-  }, [selectedLang, autoTranslate, playAudio]);
+  }, [selectedLang, autoTranslate, playAudio, disablePlayback]);
 
   useEffect(() => {
     if (targetLang && targetLang !== selectedLang) {
@@ -189,6 +212,14 @@ const TranslatorPanel = ({
       processQueue();
     }
   }, [autoTranslate, processQueue]);
+
+  useEffect(() => {
+    if (!disablePlayback) return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+  }, [disablePlayback]);
 
   useEffect(() => {
     if (!listRef.current || !stickToBottom) return;
@@ -244,6 +275,14 @@ const TranslatorPanel = ({
       audioRef.current.src = "";
     }
   };
+
+  const translateButtonLabel = autoTranslate
+    ? disablePlayback
+      ? "Translating (audio off)"
+      : "Stop translation audio"
+    : disablePlayback
+    ? "Translate (audio off)"
+    : "Start translate + speak";
 
   return (
     <div className="flex h-full flex-col gap-4 p-4">
@@ -304,7 +343,12 @@ const TranslatorPanel = ({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => setAutoTranslate((prev) => !prev)}
+          onClick={() => {
+            if (!autoTranslate && disablePlayback) {
+              setShowSpeakerNote(true);
+            }
+            setAutoTranslate((prev) => !prev);
+          }}
           className={`inline-flex items-center justify-center rounded-md border px-3 py-2 text-[12px] font-light transition ${
             autoTranslate
               ? "border-blue-400 bg-blue-500/20 text-blue-200"
@@ -312,7 +356,7 @@ const TranslatorPanel = ({
           }`}
           title="Toggle translation audio"
         >
-          {autoTranslate ? "Stop translation audio" : "Start translate + speak"}
+          {translateButtonLabel}
         </button>
         <button
           type="button"
@@ -382,6 +426,28 @@ const TranslatorPanel = ({
       <div className="border-t border-white/10 pt-3 text-center text-xs text-white/40">
         Listening in: {languages.find((l) => l.value === selectedLang)?.label || selectedLang}
       </div>
+
+      <Dialog open={showSpeakerNote} onOpenChange={setShowSpeakerNote}>
+        <DialogContent className="border-white/10 bg-dark-1 text-white">
+          <DialogHeader className="space-y-2 text-left">
+            <DialogTitle>Translation Audio Note</DialogTitle>
+            <DialogDescription className="text-sky-2">
+              Note: If you are the speaker. Translator audio for you will be
+              available to your listeners! If you wish to hear your own
+              translation, you can use another device or ask a partner to listen
+              to you!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              className="bg-blue-1"
+              onClick={() => setShowSpeakerNote(false)}
+            >
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
