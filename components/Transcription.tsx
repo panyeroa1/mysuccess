@@ -48,15 +48,24 @@ const Transcription = ({
   const transcriptRowRef = useRef<string | null>(null);
   const transcriptBufferRef = useRef({ original: "", translated: "" });
   const isAiSpeakingRef = useRef(false);
+  const isAiProcessingRef = useRef(false);
+
+  const isShieldActive = () => isAiSpeakingRef.current || isAiProcessingRef.current;
 
   useEffect(() => {
     const start = () => { isAiSpeakingRef.current = true; };
     const end = () => { isAiSpeakingRef.current = false; };
+    const seqStart = () => { isAiProcessingRef.current = true; };
+    const seqEnd = () => { isAiProcessingRef.current = false; };
     window.addEventListener("ai-speaking-start", start);
     window.addEventListener("ai-speaking-end", end);
+    window.addEventListener("ai-sequence-start", seqStart);
+    window.addEventListener("ai-sequence-end", seqEnd);
     return () => {
       window.removeEventListener("ai-speaking-start", start);
       window.removeEventListener("ai-speaking-end", end);
+      window.removeEventListener("ai-sequence-start", seqStart);
+      window.removeEventListener("ai-sequence-end", seqEnd);
     };
   }, []);
 
@@ -309,7 +318,7 @@ const Transcription = ({
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
         processor.onaudioprocess = (e) => {
-          if (ws.readyState !== WebSocket.OPEN || isAiSpeakingRef.current || isMicMutedForSTT) return;
+          if (ws.readyState !== WebSocket.OPEN || isShieldActive() || isMicMutedForSTT) return;
 
           const inputData = e.inputBuffer.getChannelData(0);
           const pcmData = new Int16Array(inputData.length);
@@ -375,7 +384,7 @@ const Transcription = ({
 
     webSpeechActiveRef.current = true;
     recognition.onresult = (event: any) => {
-      if (isAiSpeakingRef.current || isMicMutedForSTT) return;
+      if (isShieldActive() || isMicMutedForSTT) return;
       let interim = "";
       let finalText = "";
 
@@ -422,7 +431,7 @@ const Transcription = ({
       microphoneRef.current = recorder;
 
       recorder.addEventListener("dataavailable", async (event) => {
-        if (!event.data || event.data.size === 0 || isAiSpeakingRef.current || isMicMutedForSTT) return;
+        if (!event.data || event.data.size === 0 || isShieldActive() || isMicMutedForSTT) return;
         const text = await sendToFastWhisper(event.data);
         if (text) {
           await handleFinalTranscript(text);

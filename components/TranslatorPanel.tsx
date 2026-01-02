@@ -70,9 +70,12 @@ const TranslatorPanel = ({
       window.dispatchEvent(new CustomEvent("ai-speaking-start"));
 
       audio.onended = () => {
-        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
-        URL.revokeObjectURL(url);
-        resolve();
+        // 500ms cooldown to account for reverb/echo tail
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("ai-speaking-end"));
+          URL.revokeObjectURL(url);
+          resolve();
+        }, 500);
       };
       audio.onerror = () => {
         window.dispatchEvent(new CustomEvent("ai-speaking-end"));
@@ -88,6 +91,9 @@ const TranslatorPanel = ({
   const processQueue = useCallback(async () => {
     if (processingRef.current || !autoTranslate) return;
     processingRef.current = true;
+
+    // Signal start of a translation sequence to close gaps between sentences
+    window.dispatchEvent(new CustomEvent("ai-sequence-start"));
 
     while (queueRef.current.length > 0 && autoTranslate) {
       const sentence = queueRef.current.shift()?.trim();
@@ -158,6 +164,7 @@ const TranslatorPanel = ({
     }
 
     processingRef.current = false;
+    window.dispatchEvent(new CustomEvent("ai-sequence-end"));
   }, [selectedLang, autoTranslate, playAudio]);
 
   useEffect(() => {
@@ -193,14 +200,25 @@ const TranslatorPanel = ({
       const media = document.querySelectorAll("audio, video");
       media.forEach((m) => {
         if (m === audioRef.current) return;
-        (m as HTMLMediaElement).muted = isMeetingMuted;
+        const el = m as HTMLMediaElement;
+        if (el.muted !== isMeetingMuted) {
+          el.muted = isMeetingMuted;
+        }
       });
     };
 
     syncMute();
+    
+    // Regular interval sync for stubborn dynamically added elements
+    const interval = setInterval(syncMute, 1000);
+    
     const obs = new MutationObserver(syncMute);
     obs.observe(document.body, { childList: true, subtree: true });
-    return () => obs.disconnect();
+    
+    return () => {
+        clearInterval(interval);
+        obs.disconnect();
+    };
   }, [isMeetingMuted]);
 
   useEffect(() => {
