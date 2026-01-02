@@ -1,5 +1,5 @@
 import MeetingTypeList from "@/components/MeetingTypeList";
-import Upcoming from "./upcoming/page";
+import Upcoming from "../upcoming/page";
 
 const Home = () => {
   const now = new Date();

@@ -14,6 +14,7 @@ import ReactDatePicker from "react-datepicker";
 import { useToast } from "./ui/use-toast";
 import { Input } from "./ui/input";
 import Upcoming from "@/app/(root)/(home)/upcoming/page";
+import { generateJoinCode } from "@/lib/utils";
 
 const initialValues = {
   dateTime: new Date(),
@@ -28,6 +29,7 @@ const MeetingTypeList = () => {
   >(undefined);
   const [values, setValues] = useState(initialValues);
   const [callDetail, setCallDetail] = useState<Call>();
+  const [joinCode, setJoinCode] = useState<string | null>(null);
   const client = useStreamVideoClient();
   const { user } = useUser();
   const { toast } = useToast();
@@ -35,11 +37,13 @@ const MeetingTypeList = () => {
   const createMeeting = async () => {
     if (!client || !user) return;
     try {
+      setJoinCode(null);
       if (!values.dateTime) {
         toast({ title: "Please select a date and time" });
         return;
       }
       const id = crypto.randomUUID();
+      const nextJoinCode = generateJoinCode();
       const call = client.call("default", id);
       if (!call) throw new Error("Failed to create meeting");
       const startsAt =
@@ -50,10 +54,12 @@ const MeetingTypeList = () => {
           starts_at: startsAt,
           custom: {
             description,
+            join_code: nextJoinCode,
           },
         },
       });
       setCallDetail(call);
+      setJoinCode(nextJoinCode);
       if (!values.description) {
         router.push(`/meeting/${call.id}`);
       }
@@ -69,6 +75,10 @@ const MeetingTypeList = () => {
   if (!client || !user) return <Loader />;
 
   const meetingLink = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${callDetail?.id}`;
+  const joinPortalLink = `${process.env.NEXT_PUBLIC_BASE_URL}/join`;
+  const inviteText = joinCode
+    ? `Classroom Join: ${joinPortalLink}\nClassroom Code: ${joinCode}\nMeeting Link: ${meetingLink}`
+    : `Meeting Link: ${meetingLink}`;
 
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -140,14 +150,23 @@ const MeetingTypeList = () => {
           onClose={() => setMeetingState(undefined)}
           title="Meeting Created"
           handleClick={() => {
-            navigator.clipboard.writeText(meetingLink);
-            toast({ title: "Link Copied" });
+            navigator.clipboard.writeText(inviteText);
+            toast({ title: "Invite Copied" });
           }}
           image={"/icons/checked.svg"}
           buttonIcon="/icons/copy.svg"
           className="text-center"
-          buttonText="Copy Meeting Link"
-        />
+          buttonText="Copy Link + Code"
+        >
+          {joinCode && (
+            <div className="flex flex-col items-center gap-1 rounded-md bg-dark-3 px-4 py-3 text-center">
+              <span className="text-sm text-sky-2">Classroom Code</span>
+              <span className="text-2xl font-bold tracking-[0.3em]">
+                {joinCode}
+              </span>
+            </div>
+          )}
+        </MeetingModal>
       )}
 
       <MeetingModal

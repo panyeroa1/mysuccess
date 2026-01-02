@@ -87,8 +87,10 @@ const MeetingRoom = () => {
   const { user } = useUser();
   const call = useCall();
   const [showControls, setShowControls] = useState(true);
+  const leavePath = user ? "/dashboard" : "/join";
   const localUserId = localParticipant?.userId ?? user?.id ?? null;
   const listenerId = localUserId;
+  const joinCode = call?.state?.custom?.join_code as string | undefined;
   const resolvedSpeakerId = (() => {
     if (audioSource === "microphone" || audioSource === "both") {
       return localUserId;
@@ -158,11 +160,14 @@ const MeetingRoom = () => {
   
   const handleInvite = () => {
     const meetingLink = window.location.href;
+    const joinPortal = `${window.location.origin}/join`;
     const meetingId = call?.id;
     const passcode = call?.state?.custom?.password || "None";
     
     const inviteText = `
-Join Meeting: ${meetingLink}
+Classroom Join: ${joinPortal}
+Classroom Code: ${joinCode || "None"}
+Meeting Link: ${meetingLink}
 Meeting ID: ${meetingId}
 Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
     `.trim();
@@ -255,9 +260,9 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
         </div>
       </div>
 
-      {user && call && showCaptions && (
+      {call && showCaptions && localUserId && (
         <Transcription 
-            userId={user.id} 
+            userId={localUserId} 
             meetingId={call.id} 
             speakerId={resolvedSpeakerId}
             listenerId={listenerId}
@@ -279,7 +284,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             !showControls && "translate-y-full"
         )}
       >
-        <CallControls onLeave={() => router.push(`/`)} />
+        <CallControls onLeave={() => router.push(leavePath)} />
 
         <DropdownMenu>
           <div className="flex items-center">

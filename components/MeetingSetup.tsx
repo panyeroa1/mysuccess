@@ -16,6 +16,7 @@ const MeetingSetup = ({
   const [isMicCamToggledOn, setIsMicCamToggleOn] = useState(false);
 
   const call = useCall();
+  const joinCode = call?.state?.custom?.join_code as string | undefined;
 
   if (!call) {
     throw new Error("usecall must be used within StreamCall component");
@@ -34,6 +35,16 @@ const MeetingSetup = ({
     <>
       <div className="flex h-screen w-full flex-col items-center justify-center gap-3 text-white">
         <h1 className="text-2xl font-bold">Setup</h1>
+        {joinCode && (
+          <div className="rounded-md border border-white/10 bg-dark-3 px-4 py-2 text-center">
+            <div className="text-xs uppercase tracking-widest text-sky-2">
+              Classroom Code
+            </div>
+            <div className="text-2xl font-bold tracking-[0.35em]">
+              {joinCode}
+            </div>
+          </div>
+        )}
         <VideoPreview />
         <div className="flex h-16 items-center justify-center gap-3">
           <label className="flex items-center justify-center gap-2 font-medium">
