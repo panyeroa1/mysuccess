@@ -45,6 +45,18 @@ const Transcription = ({
   const deepgramBusyRef = useRef(false);
   const transcriptRowRef = useRef<string | null>(null);
   const transcriptBufferRef = useRef({ original: "", translated: "" });
+  const isAiSpeakingRef = useRef(false);
+
+  useEffect(() => {
+    const start = () => { isAiSpeakingRef.current = true; };
+    const end = () => { isAiSpeakingRef.current = false; };
+    window.addEventListener("ai-speaking-start", start);
+    window.addEventListener("ai-speaking-end", end);
+    return () => {
+      window.removeEventListener("ai-speaking-start", start);
+      window.removeEventListener("ai-speaking-end", end);
+    };
+  }, []);
 
   const resetClearTimer = () => {
     if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
@@ -295,7 +307,7 @@ const Transcription = ({
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
         processor.onaudioprocess = (e) => {
-          if (ws.readyState !== WebSocket.OPEN) return;
+          if (ws.readyState !== WebSocket.OPEN || isAiSpeakingRef.current) return;
 
           const inputData = e.inputBuffer.getChannelData(0);
           const pcmData = new Int16Array(inputData.length);
@@ -361,6 +373,7 @@ const Transcription = ({
 
     webSpeechActiveRef.current = true;
     recognition.onresult = (event: any) => {
+      if (isAiSpeakingRef.current) return;
       let interim = "";
       let finalText = "";
 
@@ -407,7 +420,7 @@ const Transcription = ({
       microphoneRef.current = recorder;
 
       recorder.addEventListener("dataavailable", async (event) => {
-        if (!event.data || event.data.size === 0) return;
+        if (!event.data || event.data.size === 0 || isAiSpeakingRef.current) return;
         const text = await sendToFastWhisper(event.data);
         if (text) {
           await handleFinalTranscript(text);

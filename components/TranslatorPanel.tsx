@@ -32,6 +32,7 @@ const TranslatorPanel = ({
   const [items, setItems] = useState<TranslationItem[]>([]);
   const [stickToBottom, setStickToBottom] = useState(true);
   const [isMeetingMuted, setIsMeetingMuted] = useState(false);
+  const [voiceVolume, setVoiceVolume] = useState(1.0);
   const queueRef = useRef<string[]>([]);
   const processingRef = useRef(false);
   const lastIndexRef = useRef(0);
@@ -54,17 +55,26 @@ const TranslatorPanel = ({
       const audio = new Audio(url);
       audio.preload = "auto";
       audio.muted = false;
-      audio.volume = 1;
+      audio.volume = voiceVolume;
       audioRef.current = audio;
+
+      // Dispatch event to prevent feedback loop
+      window.dispatchEvent(new CustomEvent("ai-speaking-start"));
+
       audio.onended = () => {
+        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
         URL.revokeObjectURL(url);
         resolve();
       };
       audio.onerror = () => {
+        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
         URL.revokeObjectURL(url);
         resolve();
       };
-      audio.play().catch(() => resolve());
+      audio.play().catch(() => {
+        window.dispatchEvent(new CustomEvent("ai-speaking-end"));
+        resolve();
+      });
     });
 
   const processQueue = useCallback(async () => {
@@ -185,6 +195,12 @@ const TranslatorPanel = ({
     return () => obs.disconnect();
   }, [isMeetingMuted]);
 
+  useEffect(() => {
+    if (audioRef.current) {
+        audioRef.current.volume = voiceVolume;
+    }
+  }, [voiceVolume]);
+
   const handleListScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const threshold = 24;
@@ -251,10 +267,27 @@ const TranslatorPanel = ({
         >
           {isMeetingMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
         </button>
+        
+        {/* Volume Slider for AI Voice */}
+        <div className="flex items-center gap-2 px-1">
+          <label htmlFor="ai-voice-volume" className="sr-only">AI Volume</label>
+          <input
+            id="ai-voice-volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={voiceVolume}
+            onChange={(e) => setVoiceVolume(parseFloat(e.target.value))}
+            className="h-1.5 w-16 cursor-pointer appearance-none rounded-lg bg-white/10 accent-blue-500"
+            title="AI Voice Volume"
+          />
+        </div>
+
         <button
           type="button"
           onClick={handleClear}
-          className="ml-auto inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-light text-white/70 transition hover:border-white/20 hover:bg-white/10"
+          className="ml-auto inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 py-2 text-[12px] font-light text-white/70 transition hover:border-white/20 hover:bg-white/10"
         >
           Clear
         </button>
