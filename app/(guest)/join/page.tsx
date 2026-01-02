@@ -6,14 +6,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { DEFAULT_JOIN_CODE, DEFAULT_STUDENT_NAME } from "@/lib/utils";
+import {
+  DEFAULT_JOIN_CODE,
+  DEFAULT_STUDENT_NAME,
+  DEFAULT_TEACHER_ID,
+} from "@/lib/utils";
 
 const JoinPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
+  const [name, setName] = useState(DEFAULT_TEACHER_ID);
+  const [code, setCode] = useState(DEFAULT_JOIN_CODE);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {

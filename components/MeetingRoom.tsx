@@ -241,11 +241,12 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
 
         {/* Translator Sidebar */}
         <div
+          aria-hidden={!showTranslator}
           className={cn(
-            "pointer-events-auto absolute right-4 top-4 bottom-24 hidden w-[400px] max-w-[90vw]",
-            {
-              "show-block": showTranslator,
-            }
+            "absolute right-4 top-4 bottom-24 w-[400px] max-w-[90vw] transition duration-300",
+            showTranslator
+              ? "pointer-events-auto translate-x-0 opacity-100"
+              : "pointer-events-none translate-x-8 opacity-0"
           )}
         >
           <div className="h-full rounded-2xl border border-white/10 bg-[#0f141c]/90 overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur">
