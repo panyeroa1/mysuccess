@@ -24,9 +24,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
 
-  if (!/^[A-Z0-9]{5}$/.test(code)) {
+  if (!/^[A-Z0-9]{6}$/.test(code)) {
     return NextResponse.json(
-      { error: "Enter a valid 5-character code." },
+      { error: "Enter a valid 6-character code." },
       { status: 400 }
     );
   }

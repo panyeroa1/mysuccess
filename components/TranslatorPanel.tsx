@@ -53,11 +53,71 @@ const TranslatorPanel = ({
   const [isMeetingMuted, setIsMeetingMuted] = useState(false);
   const [voiceVolume, setVoiceVolume] = useState(1.0);
   const [showSpeakerNote, setShowSpeakerNote] = useState(false);
+  const [isTtsActive, setIsTtsActive] = useState(false);
+  const [visualizerLevels, setVisualizerLevels] = useState<number[]>(
+    Array.from({ length: 24 }, () => 0)
+  );
   const queueRef = useRef<string[]>([]);
   const processingRef = useRef(false);
   const lastIndexRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const stopVisualizer = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    analyserRef.current = null;
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    setIsTtsActive(false);
+    setVisualizerLevels(Array.from({ length: 24 }, () => 0));
+  }, []);
+
+  const startVisualizer = useCallback(
+    (audio: HTMLAudioElement) => {
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext })
+            .webkitAudioContext;
+        if (!AudioCtx) return;
+
+        const context = new AudioCtx();
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 64;
+        const source = context.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(context.destination);
+
+        audioContextRef.current = context;
+        analyserRef.current = analyser;
+        setIsTtsActive(true);
+
+        const data = new Uint8Array(analyser.frequencyBinCount);
+        const tick = () => {
+          if (!analyserRef.current) return;
+          analyserRef.current.getByteFrequencyData(data);
+          const nextLevels = Array.from({ length: 24 }, (_, index) => {
+            const value = data[index] ?? 0;
+            return value / 255;
+          });
+          setVisualizerLevels(nextLevels);
+          rafRef.current = requestAnimationFrame(tick);
+        };
+        tick();
+      } catch (error) {
+        console.error("Visualizer failed:", error);
+      }
+    },
+    []
+  );
 
   const handleLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
@@ -77,11 +137,13 @@ const TranslatorPanel = ({
           audioRef.current.pause();
           audioRef.current.src = "";
         }
+        stopVisualizer();
         const audio = new Audio(url);
         audio.preload = "auto";
         audio.muted = false;
         audio.volume = voiceVolume;
         audioRef.current = audio;
+        startVisualizer(audio);
 
         // Dispatch event to prevent feedback loop
         window.dispatchEvent(new CustomEvent("ai-speaking-start"));
@@ -91,20 +153,23 @@ const TranslatorPanel = ({
           setTimeout(() => {
             window.dispatchEvent(new CustomEvent("ai-speaking-end"));
             URL.revokeObjectURL(url);
+            stopVisualizer();
             resolve();
           }, 500);
         };
         audio.onerror = () => {
           window.dispatchEvent(new CustomEvent("ai-speaking-end"));
           URL.revokeObjectURL(url);
+          stopVisualizer();
           resolve();
         };
         audio.play().catch(() => {
           window.dispatchEvent(new CustomEvent("ai-speaking-end"));
+          stopVisualizer();
           resolve();
         });
       }),
-    [disablePlayback, voiceVolume]
+    [disablePlayback, voiceVolume, startVisualizer, stopVisualizer]
   );
 
   const processQueue = useCallback(async () => {
@@ -258,6 +323,8 @@ const TranslatorPanel = ({
     }
   }, [voiceVolume]);
 
+  useEffect(() => () => stopVisualizer(), [stopVisualizer]);
+
   const handleListScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const threshold = 24;
@@ -407,12 +474,11 @@ const TranslatorPanel = ({
         ) : (
           items.map((item) => (
             <div key={item.id} className="space-y-2">
-              <div className="text-white/80">{item.source}</div>
               <div
                 className={
                   item.status === "error"
                     ? "text-red-300"
-                    : "text-emerald-200"
+                    : "text-emerald-200 text-[15px]"
                 }
               >
                 {item.translated || "Translating..."}
@@ -420,6 +486,27 @@ const TranslatorPanel = ({
             </div>
           ))
         )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex h-10 items-end gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-2">
+          {visualizerLevels.map((level, index) => {
+            const height = Math.max(10, Math.round(level * 100));
+            return (
+              <span
+                key={index}
+                className="flex-1 rounded-sm bg-blue-400/80 transition"
+                style={{
+                  height: `${height}%`,
+                  opacity: isTtsActive ? 1 : 0.35,
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="text-center text-[10px] uppercase tracking-[0.35em] text-white/40">
+          TTS Output
+        </div>
       </div>
 
       {/* Footer showing selected language */}

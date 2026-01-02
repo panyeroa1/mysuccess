@@ -21,7 +21,7 @@ const roleCards = [
   },
   {
     title: "Guest",
-    description: "Join instantly with the 5-character classroom code.",
+    description: "Join instantly with the 6-character classroom code.",
     href: "/join",
     buttonLabel: "Continue as Guest",
     tone: "from-emerald-400/20 via-emerald-400/5 to-transparent",

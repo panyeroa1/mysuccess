@@ -5,6 +5,7 @@ import { useStreamVideoClient } from "@stream-io/video-react-sdk";
 import { useRouter } from "next/navigation";
 
 import { useGetCallById } from "@/hooks/useGetCallById";
+import { DEFAULT_JOIN_CODE, DEFAULT_TEACHER_ID, generateJoinCode } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -43,9 +44,14 @@ const PersonalRoom = () => {
     const newCall = client.call("default", meetingId!);
 
     if (!call) {
+      const joinCode =
+        user.id === DEFAULT_TEACHER_ID ? DEFAULT_JOIN_CODE : generateJoinCode();
       await newCall.getOrCreate({
         data: {
           starts_at: new Date().toISOString(),
+          custom: {
+            join_code: joinCode,
+          },
         },
       });
     }

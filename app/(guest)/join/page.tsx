@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { DEFAULT_JOIN_CODE, DEFAULT_STUDENT_NAME } from "@/lib/utils";
 
 const JoinPage = () => {
   const router = useRouter();
@@ -16,14 +17,25 @@ const JoinPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const prefillName = searchParams.get("name");
     const prefill = searchParams.get("code");
+    if (prefillName) {
+      setName(prefillName.slice(0, 60));
+    }
     if (!prefill) return;
     const normalized = prefill
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
-      .slice(0, 5);
+      .slice(0, 6);
     if (normalized) setCode(normalized);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (code || !name.trim()) return;
+    if (name.trim().toUpperCase() === DEFAULT_STUDENT_NAME) {
+      setCode(DEFAULT_JOIN_CODE);
+    }
+  }, [code, name]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,8 +47,8 @@ const JoinPage = () => {
       return;
     }
 
-    if (!/^[A-Z0-9]{5}$/.test(normalizedCode)) {
-      toast({ title: "Enter a valid 5-character code." });
+    if (!/^[A-Z0-9]{6}$/.test(normalizedCode)) {
+      toast({ title: "Enter a valid 6-character code." });
       return;
     }
 
@@ -73,7 +85,7 @@ const JoinPage = () => {
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-dark-1 p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
         <h1 className="text-3xl font-bold">Join Classroom</h1>
         <p className="mt-2 text-sm text-sky-2">
-          Enter the 5-character code from your teacher and your name.
+          Enter the 6-character code from your teacher and your name.
         </p>
         <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit}>
           <Input
@@ -89,7 +101,7 @@ const JoinPage = () => {
               const next = event.target.value
                 .toUpperCase()
                 .replace(/[^A-Z0-9]/g, "")
-                .slice(0, 5);
+                .slice(0, 6);
               setCode(next);
             }}
             placeholder="Class code"

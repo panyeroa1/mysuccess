@@ -14,7 +14,7 @@ import ReactDatePicker from "react-datepicker";
 import { useToast } from "./ui/use-toast";
 import { Input } from "./ui/input";
 import Upcoming from "@/app/(root)/(home)/upcoming/page";
-import { generateJoinCode } from "@/lib/utils";
+import { DEFAULT_JOIN_CODE, DEFAULT_TEACHER_ID, generateJoinCode } from "@/lib/utils";
 
 const initialValues = {
   dateTime: new Date(),
@@ -43,7 +43,8 @@ const MeetingTypeList = () => {
         return;
       }
       const id = crypto.randomUUID();
-      const nextJoinCode = generateJoinCode();
+      const nextJoinCode =
+        user.id === DEFAULT_TEACHER_ID ? DEFAULT_JOIN_CODE : generateJoinCode();
       const call = client.call("default", id);
       if (!call) throw new Error("Failed to create meeting");
       const startsAt =
