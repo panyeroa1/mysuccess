@@ -11,6 +11,7 @@ import {
   DEFAULT_STUDENT_NAME,
   DEFAULT_TEACHER_ID,
 } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 const JoinPage = () => {
   const router = useRouter();
@@ -58,6 +59,32 @@ const JoinPage = () => {
 
     setIsSubmitting(true);
     try {
+      let authUser = (await supabase.auth.getSession()).data.session?.user;
+      if (!authUser) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error || !data.user) {
+          toast({ title: "Unable to authenticate anonymously." });
+          return;
+        }
+        authUser = data.user;
+      }
+
+      const { error: profileError } = await supabase
+        .from("anonymous_users")
+        .upsert(
+          {
+            auth_user_id: authUser.id,
+            display_name: trimmedName,
+            class_code: normalizedCode,
+          },
+          { onConflict: "auth_user_id" }
+        );
+
+      if (profileError) {
+        toast({ title: "Unable to save your profile." });
+        return;
+      }
+
       const response = await fetch("/api/guest-join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
