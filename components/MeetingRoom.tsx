@@ -68,7 +68,7 @@ const MeetingRoom = () => {
     useHasOngoingScreenShare,
   } = useCallStateHooks();
   const micState = useMicrophoneState();
-  const { selectedDevice, isMuted: isMeetingMicMuted } = micState;
+  const { selectedDevice, isMute: isMeetingMicMuted } = micState;
   const hasScreenShare = useHasOngoingScreenShare();
   const localParticipant = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants() ?? [];
