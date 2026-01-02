@@ -45,7 +45,7 @@ const TranslatorPanel = ({
     onLanguageChange(newLang);
   };
 
-  const playAudio = async (blob: Blob) =>
+  const playAudio = useCallback(async (blob: Blob) =>
     new Promise<void>((resolve) => {
       const url = URL.createObjectURL(blob);
       if (audioRef.current) {
@@ -75,7 +75,7 @@ const TranslatorPanel = ({
         window.dispatchEvent(new CustomEvent("ai-speaking-end"));
         resolve();
       });
-    });
+    }), [voiceVolume]);
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || !autoTranslate) return;
@@ -150,7 +150,7 @@ const TranslatorPanel = ({
     }
 
     processingRef.current = false;
-  }, [selectedLang, autoTranslate]);
+  }, [selectedLang, autoTranslate, playAudio]);
 
   useEffect(() => {
     if (targetLang && targetLang !== selectedLang) {
