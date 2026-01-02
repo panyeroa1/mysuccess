@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { languages } from "@/constants/languages";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Mic, MicOff, MessageSquare, MessageSquareOff } from "lucide-react";
 
 type TranslatorPanelProps = {
   sentences: string[];
   targetLang: string;
   onLanguageChange: (lang: string) => void;
+  isMicMutedForMeeting?: boolean;
+  onToggleMicMeeting?: () => void;
+  isMicMutedForSTT?: boolean;
+  onToggleMicSTT?: () => void;
 };
 
 type TranslationItem = {
@@ -26,6 +30,10 @@ const TranslatorPanel = ({
   sentences,
   targetLang,
   onLanguageChange,
+  isMicMutedForMeeting = false,
+  onToggleMicMeeting,
+  isMicMutedForSTT = false,
+  onToggleMicSTT,
 }: TranslatorPanelProps) => {
   const [selectedLang, setSelectedLang] = useState(targetLang || "en");
   const [autoTranslate, setAutoTranslate] = useState(false);
@@ -241,6 +249,39 @@ const TranslatorPanel = ({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Broadcast Mic Controls */}
+      <div className="flex flex-col gap-2 rounded-xl border border-white/5 bg-white/5 p-3">
+        <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1 font-medium">Broadcast Settings</div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onToggleMicMeeting}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 text-[12px] transition ${
+              isMicMutedForMeeting
+                ? "border-red-500/30 bg-red-500/10 text-red-400"
+                : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+            }`}
+            title={isMicMutedForMeeting ? "Unmute Meeting Mic" : "Mute Meeting Mic"}
+          >
+            {isMicMutedForMeeting ? <MicOff size={14} /> : <Mic size={14} />}
+            <span className="font-light">Meeting {isMicMutedForMeeting ? "Off" : "On"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onToggleMicSTT}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 text-[12px] transition ${
+              isMicMutedForSTT
+                ? "border-red-500/30 bg-red-500/10 text-red-400"
+                : "border-blue-500/30 bg-blue-500/10 text-blue-400"
+            }`}
+            title={isMicMutedForSTT ? "Unmute Translator Input" : "Mute Translator Input"}
+          >
+            {isMicMutedForSTT ? <MessageSquareOff size={14} /> : <MessageSquare size={14} />}
+            <span className="font-light">STT {isMicMutedForSTT ? "Off" : "On"}</span>
+          </button>
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <button

@@ -16,6 +16,7 @@ interface TranscriptionProps {
   screenShareAudioStream?: MediaStream | null;
   speakerAudioStream?: MediaStream | null;
   sttEngine: "deepgram" | "web-speech" | "fast-whisper";
+  isMicMutedForSTT?: boolean;
   onFinalTranscript?: (text: string) => void;
 }
 
@@ -30,6 +31,7 @@ const Transcription = ({
   screenShareAudioStream,
   speakerAudioStream,
   sttEngine,
+  isMicMutedForSTT,
   onFinalTranscript,
 }: TranscriptionProps) => {
   const [finalTranscripts, setFinalTranscripts] = useState<string[]>([]);
@@ -307,7 +309,7 @@ const Transcription = ({
         const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
         processor.onaudioprocess = (e) => {
-          if (ws.readyState !== WebSocket.OPEN || isAiSpeakingRef.current) return;
+          if (ws.readyState !== WebSocket.OPEN || isAiSpeakingRef.current || isMicMutedForSTT) return;
 
           const inputData = e.inputBuffer.getChannelData(0);
           const pcmData = new Int16Array(inputData.length);
@@ -373,7 +375,7 @@ const Transcription = ({
 
     webSpeechActiveRef.current = true;
     recognition.onresult = (event: any) => {
-      if (isAiSpeakingRef.current) return;
+      if (isAiSpeakingRef.current || isMicMutedForSTT) return;
       let interim = "";
       let finalText = "";
 
@@ -420,7 +422,7 @@ const Transcription = ({
       microphoneRef.current = recorder;
 
       recorder.addEventListener("dataavailable", async (event) => {
-        if (!event.data || event.data.size === 0 || isAiSpeakingRef.current) return;
+        if (!event.data || event.data.size === 0 || isAiSpeakingRef.current || isMicMutedForSTT) return;
         const text = await sendToFastWhisper(event.data);
         if (text) {
           await handleFinalTranscript(text);

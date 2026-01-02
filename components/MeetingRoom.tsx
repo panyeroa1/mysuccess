@@ -59,6 +59,7 @@ const MeetingRoom = () => {
     "deepgram" | "web-speech" | "fast-whisper"
   >("deepgram");
   const [targetLang, setTargetLang] = useState("en");
+  const [isMicMutedForSTT, setIsMicMutedForSTT] = useState(false);
   const {
     useCallCallingState,
     useMicrophoneState,
@@ -66,7 +67,8 @@ const MeetingRoom = () => {
     useRemoteParticipants,
     useHasOngoingScreenShare,
   } = useCallStateHooks();
-  const { selectedDevice } = useMicrophoneState();
+  const micState = useMicrophoneState();
+  const { selectedDevice, isMuted: isMeetingMicMuted } = micState;
   const hasScreenShare = useHasOngoingScreenShare();
   const localParticipant = useLocalParticipant();
   const remoteParticipants = useRemoteParticipants() ?? [];
@@ -244,6 +246,10 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
               sentences={transcriptSentences}
               targetLang={targetLang}
               onLanguageChange={setTargetLang}
+              isMicMutedForMeeting={isMeetingMicMuted}
+              onToggleMicMeeting={() => call?.microphone.toggle()}
+              isMicMutedForSTT={isMicMutedForSTT}
+              onToggleMicSTT={() => setIsMicMutedForSTT((prev) => !prev)}
             />
           </div>
         </div>
@@ -261,6 +267,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             screenShareAudioStream={sharedAudioStream}
             speakerAudioStream={speakerAudioStream}
             sttEngine={sttEngine}
+            isMicMutedForSTT={isMicMutedForSTT}
             onFinalTranscript={pushTranscriptSentences}
         />
       )}
