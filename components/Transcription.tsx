@@ -529,6 +529,32 @@ const Transcription = ({
         return;
       }
 
+      const { data: existingRow, error: lookupError } = await supabase
+        .from("translations")
+        .select("id")
+        .eq("meeting_id", meetingId)
+        .eq("listener_id", resolvedListenerId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (lookupError) {
+        console.error("Failed to lookup transcript row:", lookupError);
+      }
+
+      if (existingRow?.id) {
+        transcriptRowRef.current = existingRow.id;
+        const { error } = await supabase
+          .from("translations")
+          .update(payload)
+          .eq("id", existingRow.id);
+
+        if (error) {
+          console.error("Failed to update transcript:", error);
+        }
+        return;
+      }
+
       const { data, error } = await supabase
         .from("translations")
         .insert(payload)

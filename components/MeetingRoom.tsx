@@ -20,7 +20,7 @@ import {
   Captions,
   Globe,
   UserPlus,
-  Mic,
+  Volume2,
 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 
@@ -384,7 +384,7 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             )}
             title="Speech Engine"
           >
-            <Mic size={20} className="text-white" />
+            <Volume2 size={20} className="text-white" />
           </DropdownMenuTrigger>
           <DropdownMenuContent className={menuContentClass}>
             <DropdownMenuItem className="font-bold opacity-50" disabled>
@@ -392,9 +392,9 @@ Passcode: ${passcode === "None" ? "(No Passcode)" : passcode}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="border-white/10" />
             {[
-              { label: "Deepgram", value: "deepgram" },
-              { label: "Web Speech", value: "web-speech" },
-              { label: "Fast Whisper", value: "fast-whisper" },
+              { label: "Eburon", value: "deepgram" },
+              { label: "Eburon Beta", value: "web-speech" },
+              { label: "Eburon Test", value: "fast-whisper" },
             ].map((engine) => (
               <DropdownMenuItem
                 key={engine.value}
