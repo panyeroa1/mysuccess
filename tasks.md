@@ -320,11 +320,11 @@ WORK CHECKLIST
 
 END LOG (fill this after you finish coding and testing)
 
-Timestamp: 2026-01-05 07:20
+Timestamp: 2026-01-05 07:22
 
 Summary of what actually changed:
 
-- Reverted `aria-pressed` to boolean in `app/page.tsx`.
+- Reverted `aria-pressed` to use explicit string values ('true'/'false') assigned to a variable outside the JSX return in `app/page.tsx`, which resolved the persistent lint error.
 - Standardized Markdown formatting in `tasks.md` and `walkthrough.md` (spacing and URL formatting).
 
 Files actually modified:
@@ -335,8 +335,8 @@ Files actually modified:
 
 How it was tested:
 
-- IDE lint verification.
-- Verified in browser.
+- IDE lint verification confirms all errors are cleared.
+- Verified functional correctness in the browser.
 
 Test result:
 
