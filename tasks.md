@@ -343,3 +343,48 @@ How it was tested:
 Test result:
 
 - PASS
+
+------------------------------------------------------------
+
+Task ID: T-0006
+Title: Apply New Color Palette and Provide Run Instructions
+Status: IN-PROGRESS
+Owner: Miles
+Related repo or service: meet
+Branch: main
+Created: 2026-01-05 07:22
+Last updated: 2026-01-05 07:22
+
+START LOG (fill this before you start coding)
+
+Timestamp: 2026-01-05 07:22
+
+Current behavior or state:
+
+- Current colors are Orbit branding (Black, White, Blue/Purple).
+- User requested instructions on how to run.
+- User provided a new color palette via image.
+
+Plan and scope for this task:
+
+- Apply the new color palette (#250834, #891552, #E8BE6A, #FFEDD7) to `globals.css`.
+- Update the wavy background animation to use these colors.
+- Document the running instructions clearly.
+
+Files or modules expected to change:
+
+- `styles/globals.css`
+- `tasks.md`
+
+Risks or things to watch out for:
+
+- Contrast and accessibility with the new color palette.
+
+WORK CHECKLIST
+
+- [x] Extract hex values from palette image
+- [/] Apply new palette to `globals.css`
+- [ ] Provide "How to Run" instructions
+- [ ] Verify UI changes in browser
+
+END LOG (fill this after you finish coding and testing)
