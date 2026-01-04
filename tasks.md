@@ -320,11 +320,14 @@ WORK CHECKLIST
 
 END LOG (fill this after you finish coding and testing)
 
-Timestamp: 2026-01-05 07:22
+Timestamp: 2026-01-05 07:25
 
 Summary of what actually changed:
 
-- Reverted `aria-pressed` to use explicit string values ('true'/'false') assigned to a variable outside the JSX return in `app/page.tsx`, which resolved the persistent lint error.
+- Refactored the `Tabs` component in `app/page.tsx` to use semantically correct WAI-ARIA patterns.
+- Replaced `aria-pressed` on buttons with `role="tab"` and `aria-selected`.
+- Wrapped the tab select container in a `div` with `role="tablist"`.
+- This fundamentally resolved the persistent "Invalid ARIA attribute value" linting error by using the correct attributes for the component's role.
 - Standardized Markdown formatting in `tasks.md` and `walkthrough.md` (spacing and URL formatting).
 
 Files actually modified:
@@ -336,7 +339,7 @@ Files actually modified:
 How it was tested:
 
 - IDE lint verification confirms all errors are cleared.
-- Verified functional correctness in the browser.
+- Verified that the tabs still function correctly and are accessible via the browser.
 
 Test result:
 
