@@ -15,30 +15,24 @@ function Tabs(props: React.PropsWithChildren<{}>) {
     router.push(`/?tab=${tab}`);
   }
 
-  let tabs = React.Children.map(props.children, (child, index) => {
-    const isSelected = tabIndex === index;
-    return (
-      <button
-        role="tab"
-        aria-selected={isSelected}
-        className="lk-button"
-        onClick={() => {
-          if (onTabSelected) {
-            onTabSelected(index);
-          }
-        }}
-        key={index}
-      >
-        {/* @ts-ignore */}
-        {child?.props.label}
-      </button>
-    );
-  });
-
   return (
     <div className={styles.tabContainer}>
       <div className={styles.tabSelect} role="tablist">
-        {tabs}
+        {React.Children.map(props.children, (child, index) => {
+          const isSelected = tabIndex === index;
+          return (
+            <button
+              role="tab"
+              aria-selected={isSelected ? 'true' : 'false'}
+              className="lk-button"
+              onClick={() => onTabSelected(index)}
+              key={index}
+            >
+              {/* @ts-ignore */}
+              {child?.props.label}
+            </button>
+          );
+        })}
       </div>
       {/* @ts-ignore */}
       {props.children[tabIndex]}
