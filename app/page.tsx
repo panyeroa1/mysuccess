@@ -16,6 +16,7 @@ function Tabs(props: React.PropsWithChildren<{}>) {
   }
 
   let tabs = React.Children.map(props.children, (child, index) => {
+    const isPressed = tabIndex === index ? 'true' : 'false';
     return (
       <button
         className="lk-button"
@@ -24,7 +25,7 @@ function Tabs(props: React.PropsWithChildren<{}>) {
             onTabSelected(index);
           }
         }}
-        aria-pressed={tabIndex === index}
+        aria-pressed={isPressed}
       >
         {/* @ts-ignore */}
         {child?.props.label}
