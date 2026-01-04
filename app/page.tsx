@@ -24,7 +24,7 @@ function Tabs(props: React.PropsWithChildren<{}>) {
             onTabSelected(index);
           }
         }}
-        aria-pressed={tabIndex === index ? 'true' : 'false'}
+        aria-pressed={tabIndex === index}
       >
         {/* @ts-ignore */}
         {child?.props.label}
