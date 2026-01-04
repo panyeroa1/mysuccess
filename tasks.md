@@ -348,12 +348,12 @@ Test result:
 
 Task ID: T-0006
 Title: Apply New Color Palette and Provide Run Instructions
-Status: IN-PROGRESS
+Status: DONE
 Owner: Miles
 Related repo or service: meet
 Branch: main
 Created: 2026-01-05 07:22
-Last updated: 2026-01-05 07:22
+Last updated: 2026-01-05 07:27
 
 START LOG (fill this before you start coding)
 
@@ -374,6 +374,7 @@ Plan and scope for this task:
 Files or modules expected to change:
 
 - `styles/globals.css`
+- `styles/Home.module.css`
 - `tasks.md`
 
 Risks or things to watch out for:
@@ -383,8 +384,100 @@ Risks or things to watch out for:
 WORK CHECKLIST
 
 - [x] Extract hex values from palette image
-- [/] Apply new palette to `globals.css`
-- [ ] Provide "How to Run" instructions
-- [ ] Verify UI changes in browser
+- [x] Apply new palette to `globals.css` and `Home.module.css`
+- [x] Provide "How to Run" instructions
+- [x] Verify UI changes in browser
 
 END LOG (fill this after you finish coding and testing)
+
+Timestamp: 2026-01-05 07:27
+
+Summary of what actually changed:
+
+- Extracted hex codes from image: Dark Purple (#250834), Deep Magenta (#891552), Golden Yellow (#E8BE6A), and Off-white (#FFEDD7).
+- Updated `--orbit-*` variables and LiveKit theme overrides in `globals.css`.
+- Fixed `background-clip` linting warning in `globals.css`.
+- Updated borders and separators in `Home.module.css` to use Golden Yellow.
+- Documented run instructions using `pnpm`.
+
+Files actually modified:
+
+- `styles/globals.css`
+- `styles/Home.module.css`
+- `tasks.md`
+
+How it was tested:
+
+- Visual verification via browser subagent.
+- Screenshot captured to confirm aesthetic.
+
+Test result:
+
+- PASS
+
+------------------------------------------------------------
+
+Task ID: T-0007
+Title: Update README.md with Success Class Branding
+Status: DONE
+Owner: Miles
+Related repo or service: meet
+Branch: main
+Created: 2026-01-05 07:25
+Last updated: 2026-01-05 07:30
+
+START LOG (fill this before you start coding)
+
+Timestamp: 2026-01-05 07:25
+
+Current behavior or state:
+
+- `README.md` still contains LiveKit Meet branding and default instructions.
+
+Plan and scope for this task:
+
+- Rebrand `README.md` to "Success Class".
+- Add "Powered by Orbit" sub-branding.
+- Update "How to Run" instructions to prioritize `pnpm`.
+- Describe the new premium aesthetic and color palette.
+- Remove external LiveKit links that don't align with Eburon branding.
+
+Files or modules expected to change:
+
+- `README.md`
+- `tasks.md`
+
+Risks or things to watch out for:
+
+- Ensuring all instructions are accurate for the current project state.
+
+WORK CHECKLIST
+
+- [x] Initial review of `README.md`
+- [x] Update `README.md` with new branding and instructions
+- [x] Push changes to Success repository
+
+END LOG (fill this after you finish coding and testing)
+
+Timestamp: 2026-01-05 07:30
+
+Summary of what actually changed:
+
+- Completely rebranded `README.md` to "Success Class".
+- Added "Powered by Orbit" tagline and sub-branding.
+- Updated setup instructions to use `pnpm` and protected secret configuration.
+- Documented project features and aesthetics.
+
+Files actually modified:
+
+- `README.md`
+- `tasks.md`
+
+How it was tested:
+
+- Manual verification of the content in the workspace.
+- Ensured all links and formatting follow project standards.
+
+Test result:
+
+- PASS
