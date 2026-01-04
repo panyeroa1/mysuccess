@@ -38,3 +38,46 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.5rem;
 }
+
+.flex {
+  display: flex;
+}
+
+.flexCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.gap1 {
+  gap: 1rem;
+}
+
+.mt1 {
+  margin-top: 1rem;
+}
+
+.mt0 {
+  margin-top: 0;
+}
+
+.tokenInput {
+  padding: 1px 2px;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.separator {
+  width: 100%;
+  border-color: rgba(255, 255, 255, 0.15);
+  margin-block: 1rem;
+}
+
+.fullWidthButton {
+  padding-inline: 1.25rem;
+  width: 100%;
+}

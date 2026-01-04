@@ -24,7 +24,7 @@ function Tabs(props: React.PropsWithChildren<{}>) {
             onTabSelected(index);
           }
         }}
-        aria-pressed={tabIndex === index}
+        aria-pressed={tabIndex === index ? 'true' : 'false'}
       >
         {/* @ts-ignore */}
         {child?.props.label}
@@ -54,12 +54,12 @@ function DemoMeetingTab(props: { label: string }) {
   };
   return (
     <div className={styles.tabContent}>
-      <p style={{ margin: 0 }}>Try LiveKit Meet for free with our live demo project.</p>
-      <button style={{ marginTop: '1rem' }} className="lk-button" onClick={startMeeting}>
+      <p className={styles.mt0}>Join a secure video call today with Success Class.</p>
+      <button className={`lk-button ${styles.mt1}`} onClick={startMeeting}>
         Start Meeting
       </button>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+      <div className={`${styles.flexCol} ${styles.gap1}`}>
+        <div className={`${styles.flexRow} ${styles.gap1}`}>
           <input
             id="use-e2ee"
             type="checkbox"
@@ -69,7 +69,7 @@ function DemoMeetingTab(props: { label: string }) {
           <label htmlFor="use-e2ee">Enable end-to-end encryption</label>
         </div>
         {e2ee && (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+          <div className={`${styles.flexRow} ${styles.gap1}`}>
             <label htmlFor="passphrase">Passphrase</label>
             <input
               id="passphrase"
@@ -105,8 +105,8 @@ function CustomConnectionTab(props: { label: string }) {
   };
   return (
     <form className={styles.tabContent} onSubmit={onSubmit}>
-      <p style={{ marginTop: 0 }}>
-        Connect LiveKit Meet with a custom server using LiveKit Cloud or LiveKit Server.
+      <p className={styles.mt0}>
+        Connect Success Class with a custom server using your own infrastructure.
       </p>
       <input
         id="serverUrl"
@@ -121,10 +121,10 @@ function CustomConnectionTab(props: { label: string }) {
         placeholder="Token"
         required
         rows={5}
-        style={{ padding: '1px 2px', fontSize: 'inherit', lineHeight: 'inherit' }}
+        className={styles.tokenInput}
       />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+      <div className={`${styles.flexCol} ${styles.gap1}`}>
+        <div className={`${styles.flexRow} ${styles.gap1}`}>
           <input
             id="use-e2ee"
             type="checkbox"
@@ -134,7 +134,7 @@ function CustomConnectionTab(props: { label: string }) {
           <label htmlFor="use-e2ee">Enable end-to-end encryption</label>
         </div>
         {e2ee && (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+          <div className={`${styles.flexRow} ${styles.gap1}`}>
             <label htmlFor="passphrase">Passphrase</label>
             <input
               id="passphrase"
@@ -146,14 +146,8 @@ function CustomConnectionTab(props: { label: string }) {
         )}
       </div>
 
-      <hr
-        style={{ width: '100%', borderColor: 'rgba(255, 255, 255, 0.15)', marginBlock: '1rem' }}
-      />
-      <button
-        style={{ paddingInline: '1.25rem', width: '100%' }}
-        className="lk-button"
-        type="submit"
-      >
+      <hr className={styles.separator} />
+      <button className={`lk-button ${styles.fullWidthButton}`} type="submit">
         Connect
       </button>
     </form>
@@ -165,17 +159,11 @@ export default function Page() {
     <>
       <main className={styles.main} data-lk-theme="default">
         <div className="header">
-          <img src="/images/livekit-meet-home.svg" alt="LiveKit Meet" width="360" height="45" />
+          <h1>Success Class</h1>
           <h2>
-            Open source video conferencing app built on{' '}
-            <a href="https://github.com/livekit/components-js?ref=meet" rel="noopener">
-              LiveKit&nbsp;Components
-            </a>
-            ,{' '}
-            <a href="https://livekit.io/cloud?ref=meet" rel="noopener">
-              LiveKit&nbsp;Cloud
-            </a>{' '}
-            and Next.js.
+            Premium video conferencing powered by Orbit.
+            <br />
+            Secure, scalable, and stunningly simple.
           </h2>
         </div>
         <Suspense fallback="Loading">
@@ -186,15 +174,7 @@ export default function Page() {
         </Suspense>
       </main>
       <footer data-lk-theme="default">
-        Hosted on{' '}
-        <a href="https://livekit.io/cloud?ref=meet" rel="noopener">
-          LiveKit Cloud
-        </a>
-        . Source code on{' '}
-        <a href="https://github.com/livekit/meet?ref=meet" rel="noopener">
-          GitHub
-        </a>
-        .
+        &copy; {new Date().getFullYear()} Success Class. Powered by Orbit.
       </footer>
     </>
   );
