@@ -111,13 +111,10 @@ export function CameraSettings() {
                 backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
                   ? styles.effectButtonActive
                   : ''
-              }`}
+              } ${image.name === 'Desk' ? styles.bgDesk : ''} ${image.name === 'Nature' ? styles.bgNature : ''}`}
               aria-pressed={
                 backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
               }
-              style={{
-                '--bg-image': `url(${image.path.src})`,
-              } as React.CSSProperties}
             >
               <span className={styles.effectLabel}>{image.name}</span>
             </button>

@@ -805,16 +805,19 @@ START LOG (fill this before you start coding)
 
 Timestamp: 2026-01-05 10:45
 Current behavior or state:
+
 - Multiple inline CSS styles in `CameraSettings.tsx` and `TranslatorDock.tsx` causing lint warnings.
 - Markdown formatting issues in brain artifacts (`implementation_plan.md`, `task.md`, `walkthrough.md`).
 
 Plan and scope for this task:
+
 - Create `styles/CameraSettings.module.css` and migrate inline styles.
 - Refactor `TranslatorDock.tsx` to reduce inline styles (where possible).
 - Fix Markdown formatting issues (blank lines, indentation) in artifacts.
 - Verify all warnings are resolved.
 
 Files or modules expected to change:
+
 - `lib/CameraSettings.tsx`
 - `styles/CameraSettings.module.css` [NEW]
 - `translator-plugin (2)/components/TranslatorDock.tsx`
@@ -823,6 +826,7 @@ Files or modules expected to change:
 - `brain/walkthrough.md`
 
 Risks or things to watch out for:
+
 - Breaking layout during CSS migration.
 
 WORK CHECKLIST
@@ -837,6 +841,7 @@ END LOG (fill this after you finish coding and testing)
 
 Timestamp: 2026-01-05 11:00
 Summary of what actually changed:
+
 - Refactored `CameraSettings.tsx` to use `CameraSettings.module.css`.
 - Refactored `TranslatorDock.tsx` (AudioVisualizer) to use `TranslatorDock.module.css` and CSS variables.
 - Fixed Markdown indentation and spacing in artifacts.
