@@ -157,10 +157,12 @@ export default function Page() {
   return (
     <>
       <main className={styles.main} data-lk-theme="default">
+        <div className={styles.blob1}></div>
+        <div className={styles.blob2}></div>
         <div className="header">
           <h1>Success Class</h1>
           <h2>
-            Premium video conferencing powered by Orbit.
+            Premium video conferencing <span className={styles.highlight}>powered by Orbit</span>.
             <br />
             Secure, scalable, and stunningly simple.
           </h2>
