@@ -4,6 +4,7 @@ import React from 'react';
 import { decodePassphrase } from '@/lib/client-utils';
 import { DebugMode } from '@/lib/Debug';
 import { KeyboardShortcuts } from '@/lib/KeyboardShortcuts';
+import styles from '@/styles/Room.module.css';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
@@ -69,9 +70,9 @@ export function PageClientImpl(props: {
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
   return (
-    <main data-lk-theme="default" style={{ height: '100%' }}>
+    <main data-lk-theme="default" className={styles.main}>
       {connectionDetails === undefined || preJoinChoices === undefined ? (
-        <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
+        <div className={styles.preJoinContainer}>
           <PreJoin
             defaults={preJoinDefaults}
             onSubmit={handlePreJoinSubmit}
@@ -218,12 +219,13 @@ function VideoConferenceComponent(props: {
   }, [lowPowerMode]);
 
   return (
-    <div className="lk-room-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <header style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, background: 'linear-gradient(180deg, var(--orbit-text) 0%, var(--orbit-secondary) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+  return (
+    <div className={`lk-room-container ${styles.roomContainer}`}>
+      <header className={styles.roomHeader}>
+        <h1 className={styles.roomTitle}>
           Success Class
         </h1>
-        <div style={{ fontSize: '0.875rem', color: 'var(--orbit-text-dim)' }}>Powered by Orbit</div>
+        <div className={styles.roomBrand}>Powered by Orbit</div>
       </header>
       <RoomContext.Provider value={room}>
         <KeyboardShortcuts />

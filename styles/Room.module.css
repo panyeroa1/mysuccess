@@ -1,0 +1,37 @@
+.main {
+  height: 100%;
+}
+
+.preJoinContainer {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.roomContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.roomHeader {
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roomTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(180deg, var(--orbit-text) 0%, var(--orbit-secondary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.roomBrand {
+  font-size: 0.875rem;
+  color: var(--orbit-text-dim);
+}

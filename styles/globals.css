@@ -162,8 +162,8 @@ body::before {
 
 .lk-control-bar {
   background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
   border-top: 1px solid var(--glass-border) !important;
   padding: 1rem !important;
 }
@@ -180,8 +180,8 @@ body::before {
 
 .lk-chat {
   background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
+  backdrop-filter: var(--glass-blur) !important;
   border-left: 1px solid var(--glass-border) !important;
 }
 
