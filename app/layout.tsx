@@ -59,6 +59,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body data-lk-theme="default">
+        <div className="global-blob-1"></div>
+        <div className="global-blob-2"></div>
         <Toaster />
         {children}
       </body>

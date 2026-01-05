@@ -120,27 +120,107 @@ body::before {
   margin-top: 0;
 }
 
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, 30px) scale(1.1); }
+}
+
+.global-blob-1, .global-blob-2 {
+  position: fixed;
+  width: clamp(250px, 40vw, 500px);
+  height: clamp(250px, 40vw, 500px);
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.global-blob-1 {
+  background: var(--orbit-accent);
+  top: 15%;
+  left: 10%;
+  animation: float 20s infinite alternate;
+}
+
+.global-blob-2 {
+  background: var(--orbit-secondary);
+  bottom: 15%;
+  right: 10%;
+  animation: float 25s infinite alternate-reverse;
+}
+
+/* LiveKit UI Overrides for Glassmorphism & Branding */
+
+.lk-room-container {
+  background: transparent !important;
+}
+
+.lk-video-conference {
+  background: transparent !important;
+}
+
+.lk-control-bar {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-top: 1px solid var(--glass-border) !important;
+  padding: 1rem !important;
+}
+
+.lk-button {
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.lk-button:hover {
+  background: rgba(137, 21, 82, 0.2) !important;
+  box-shadow: 0 0 15px rgba(137, 21, 82, 0.3) !important;
+}
+
+.lk-chat {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-left: 1px solid var(--glass-border) !important;
+}
+
+.lk-prejoin {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 1.5rem !important;
+  padding: 2.5rem !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.lk-prejoin h1 {
+  font-family: var(--lk-font-family) !important;
+  color: var(--orbit-text) !important;
+}
+
 footer {
   width: 100%;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   color: var(--orbit-text-dim);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(19, 4, 26, 0.6);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--glass-border);
   font-size: 0.875rem;
   z-index: 1;
 }
 
 footer a,
 h2 a {
-  color: var(--orbit-accent);
+  color: var(--orbit-secondary);
   text-decoration: none;
   transition: color 0.2s;
 }
 
 footer a:hover,
 h2 a:hover {
-  color: #60a5fa;
+  color: var(--orbit-text);
 }

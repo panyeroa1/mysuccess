@@ -157,8 +157,6 @@ export default function Page() {
   return (
     <>
       <main className={styles.main} data-lk-theme="default">
-        <div className={styles.blob1}></div>
-        <div className={styles.blob2}></div>
         <div className="header">
           <h1>Success Class</h1>
           <h2>
