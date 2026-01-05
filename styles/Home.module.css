@@ -12,7 +12,8 @@
 .tabContainer {
   width: 100%;
   max-width: 500px;
-  padding-inline: 2rem;
+  padding-inline: clamp(1rem, 5vw, 2rem);
+  margin: 0 auto;
 }
 
 .tabSelect {
@@ -109,13 +110,13 @@
 
 .blob1, .blob2 {
   position: absolute;
-  width: 400px;
-  height: 400px;
+  width: clamp(200px, 50vw, 400px);
+  height: clamp(200px, 50vw, 400px);
   border-radius: 50%;
   filter: blur(80px);
   z-index: -1;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .blob1 {
