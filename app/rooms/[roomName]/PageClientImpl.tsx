@@ -8,6 +8,7 @@ import styles from '@/styles/Room.module.css';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
+import TranslatorPlugin from '@/lib/translator/TranslatorPlugin';
 import {
   formatChatMessageLinks,
   LocalUserChoices,
@@ -232,6 +233,13 @@ function VideoConferenceComponent(props: {
           chatMessageFormatter={formatChatMessageLinks}
           SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
         />
+        <div className={styles.translatorDockWrapper}>
+          <TranslatorPlugin
+            roomName={props.connectionDetails.roomName}
+            participantName={props.connectionDetails.participantName}
+            room={room}
+          />
+        </div>
         <DebugMode />
         <RecordingIndicator />
       </RoomContext.Provider>
