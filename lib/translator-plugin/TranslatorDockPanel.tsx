@@ -40,6 +40,7 @@ export default function TranslatorDockPanel() {
       translatedStreamText={translatedStreamText}
       isTtsLoading={isTtsLoading}
       emotion={emotion}
+      hideControls={true}
     />
   );
 }

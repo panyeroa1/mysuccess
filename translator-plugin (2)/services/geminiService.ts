@@ -2,7 +2,12 @@
 import { GoogleGenAI, Modality, Type, LiveServerMessage } from "@google/genai";
 import { TranslationResult, EmotionType } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const ai = GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
+
+if (!GEMINI_API_KEY && typeof window !== "undefined") {
+  console.warn("Gemini API key is not configured; translator features will be disabled.");
+}
 
 /**
  * Decodes base64 string to Uint8Array.
@@ -55,6 +60,12 @@ export async function streamTranslation(
 ) {
   let nextStartTime = 0;
   let fullTranslation = "";
+
+  if (!ai) {
+    onTranscript(sourceText);
+    onEnd();
+    return;
+  }
 
   const sessionPromise = ai.live.connect({
     model: 'gemini-2.5-flash-native-audio-preview-09-2025',

@@ -6,7 +6,7 @@ const nextConfig = {
     formats: ['image/webp'],
   },
   env: {
-    API_KEY: process.env.API_KEY,
+    NEXT_PUBLIC_GEMINI_API_KEY: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
     // Important: return the modified config

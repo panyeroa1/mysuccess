@@ -19,6 +19,7 @@ interface TranslatorDockProps {
   translatedStreamText?: string;
   isTtsLoading?: boolean;
   emotion?: EmotionType;
+  hideControls?: boolean;
 }
 
 const emotionColors: Record<EmotionType, string> = {
@@ -72,7 +73,8 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
   liveStreamText,
   translatedStreamText,
   isTtsLoading,
-  emotion = 'neutral'
+  emotion = 'neutral',
+  hideControls = false,
 }) => {
   const isSomeoneElseSpeaking = roomState.activeSpeaker && roomState.activeSpeaker.userId !== myUserId;
   const isMeSpeaking = mode === 'speaking';
@@ -96,7 +98,7 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
     <div className="flex flex-col items-center w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
       
       {/* Dynamic Subtitle Display with Emotion Synthesis */}
-      <div className="h-16 w-full flex items-center justify-center mb-8 px-10">
+      <div className={`w-full flex items-center justify-center px-10 ${hideControls ? 'h-auto min-h-[4rem]' : 'h-16 mb-8'}`}>
         <div className="max-w-full overflow-hidden text-center">
           {displayText && (
             <p className={`text-2xl font-bold tracking-tight whitespace-normal break-words animate-in fade-in slide-in-from-bottom-4 duration-500 ${
@@ -108,7 +110,8 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
         </div>
       </div>
 
-      <div className="relative flex items-stretch h-[74px] bg-[#1a2333]/95 backdrop-blur-2xl rounded-[26px] shadow-[0_25px_60px_rgba(0,0,0,0.6)] border border-slate-700/50 w-full max-w-[860px]">
+      {!hideControls && (
+        <div className="relative flex items-stretch h-[74px] bg-[#1a2333]/95 backdrop-blur-2xl rounded-[26px] shadow-[0_25px_60px_rgba(0,0,0,0.6)] border border-slate-700/50 w-full max-w-[860px]">
         
         {/* Speak Button - Disabled if listening or someone else is speaking */}
         <div className="relative flex-1 flex items-stretch border-r border-slate-700/20">
@@ -185,6 +188,7 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
           <span className="font-bold text-[18px] tracking-tight">{isQueued ? 'Queued' : 'Queue'}</span>
         </button>
       </div>
+      )}
     </div>
   );
 };
