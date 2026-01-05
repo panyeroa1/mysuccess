@@ -8,8 +8,8 @@ import {
 } from '@livekit/components-react';
 import { BackgroundBlur, VirtualBackground } from '@livekit/track-processors';
 import { isLocalTrack, LocalTrackPublication, Track } from 'livekit-client';
-import Desk from '../public/background-images/samantha-gades-BlIhVfXbi9s-unsplash.jpg';
-import Nature from '../public/background-images/ali-kazal-tbw_KQE3Cbg-unsplash.jpg';
+import Desk from '../public/background-images/desk_background.png';
+import Nature from '../public/background-images/nature_background.png';
 
 // Background image paths
 const BACKGROUND_IMAGES = [
