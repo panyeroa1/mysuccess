@@ -836,6 +836,8 @@ WORK CHECKLIST
 - [x] Fix inline styles in `TranslatorDock.tsx`
 - [x] Fix Markdown formatting in brain artifacts
 - [x] Verify fix and push to Success repository
+- [x] Remove duplicate `translator-plugin (2)` directory
+- [x] Suppress necessary inline style warning for AudioVisualizer
 
 END LOG (fill this after you finish coding and testing)
 
