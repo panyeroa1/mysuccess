@@ -1,0 +1,71 @@
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.videoPreview {
+  max-height: 280px;
+  object-fit: contain;
+  object-position: right;
+  transform: scaleX(-1);
+}
+
+.effectsSection {
+  margin-top: 10px;
+}
+
+.effectsTitle {
+  margin-bottom: 8px;
+}
+
+.effectsGrid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.effectButton {
+  min-width: 80px;
+  border: 1px solid #d1d1d1;
+  cursor: pointer;
+}
+
+.effectButtonActive {
+  border: 2px solid #0090ff !important;
+}
+
+.blurButton {
+  background-color: #f0f0f0;
+  position: relative;
+  overflow: hidden;
+  height: 60px;
+}
+
+.blurOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e0e0e0;
+  filter: blur(8px);
+  z-index: 0;
+}
+
+.effectLabel {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: white;
+}
+
+.imageButton {
+  background-size: cover;
+  background-position: center;
+  width: 80px;
+  height: 60px;
+}

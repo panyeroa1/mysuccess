@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import TranslatorDock from '@/translator-plugin (2)/components/TranslatorDock';
+import TranslatorDock from '@/translator-plugin/components/TranslatorDock';
 import { useTranslator } from './TranslatorProvider';
 
 export default function TranslatorDockPanel() {

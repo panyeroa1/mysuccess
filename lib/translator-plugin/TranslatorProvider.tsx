@@ -10,9 +10,9 @@ import {
   RoomState,
   AudioSource,
   EmotionType,
-} from '@/translator-plugin (2)/types';
-import * as roomStateService from '@/translator-plugin (2)/services/roomStateService';
-import * as geminiService from '@/translator-plugin (2)/services/geminiService';
+} from '@/translator-plugin/types';
+import * as roomStateService from '@/translator-plugin/services/roomStateService';
+import * as geminiService from '@/translator-plugin/services/geminiService';
 
 const SUPABASE_URL = 'https://rcbuikbjqgykssiatxpo.supabase.co';
 const SUPABASE_KEY =

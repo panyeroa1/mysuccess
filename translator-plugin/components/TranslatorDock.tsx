@@ -32,6 +32,8 @@ const emotionColors: Record<EmotionType, string> = {
   excited: 'text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]',
 };
 
+import styles from '../../styles/TranslatorDock.module.css';
+
 const AudioVisualizer: React.FC<{ data: Uint8Array, colorClass?: string }> = ({ data, colorClass = 'bg-white' }) => {
   if (!data || data.length === 0) return null;
   const bars = Array.from(data.slice(3, 11));
@@ -39,18 +41,21 @@ const AudioVisualizer: React.FC<{ data: Uint8Array, colorClass?: string }> = ({ 
   if (!hasSignal) return null;
 
   return (
-    <div className="flex items-center gap-[1.5px] h-3 ml-2.5">
+    <div className={styles.visualizerContainer}>
       {bars.map((val: number, i) => {
         const height = Math.max(2, (val / 255) * 14);
+        const opacity = 0.3 + (val / 255) * 0.7;
+        const shadow = val > 120 ? `0 0 6px ${colorClass.replace('bg-', '')}` : 'none';
+        
         return (
           <div
             key={i}
-            className={`w-[1.8px] ${colorClass} rounded-full transition-all duration-100 ease-out`}
+            className={`${styles.visualizerBar} ${colorClass}`}
             style={{ 
-              height: `${height}px`,
-              opacity: 0.3 + (val / 255) * 0.7,
-              boxShadow: val > 120 ? `0 0 6px ${colorClass.replace('bg-', '')}` : 'none'
-            }}
+              '--bar-height': `${height}px`,
+              '--bar-opacity': opacity,
+              '--bar-shadow': shadow
+            } as React.CSSProperties}
           />
         );
       })}
@@ -95,10 +100,10 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+    <div className={styles.dockContainer} onClick={(e) => e.stopPropagation()}>
       
       {/* Dynamic Subtitle Display with Emotion Synthesis */}
-      <div className={`w-full flex items-center justify-center px-10 ${hideControls ? 'h-auto min-h-[4rem]' : 'h-16 mb-8'}`}>
+      <div className={`${styles.subtitleArea} ${hideControls ? styles.subtitleAreaHidden : styles.subtitleAreaVisible}`}>
         <div className="max-w-full overflow-hidden text-center">
           {displayText && (
             <p className={`text-2xl font-bold tracking-tight whitespace-normal break-words animate-in fade-in slide-in-from-bottom-4 duration-500 ${
@@ -111,7 +116,7 @@ const TranslatorDock: React.FC<TranslatorDockProps> = ({
       </div>
 
       {!hideControls && (
-        <div className="relative flex items-stretch h-[74px] bg-[#1a2333]/95 backdrop-blur-2xl rounded-[26px] shadow-[0_25px_60px_rgba(0,0,0,0.6)] border border-slate-700/50 w-full max-w-[860px]">
+        <div className={styles.controlsContainer}>
         
         {/* Speak Button - Disabled if listening or someone else is speaking */}
         <div className="relative flex-1 flex items-stretch border-r border-slate-700/20">

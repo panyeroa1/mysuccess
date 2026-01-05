@@ -11,6 +11,8 @@ import { isLocalTrack, LocalTrackPublication, Track } from 'livekit-client';
 import Desk from '../public/background-images/desk_background.png';
 import Nature from '../public/background-images/nature_background.png';
 
+import styles from '../styles/CameraSettings.module.css';
+
 // Background image paths
 const BACKGROUND_IMAGES = [
   { name: 'Desk', path: Desk },
@@ -62,15 +64,10 @@ export function CameraSettings() {
   }, [cameraTrack, backgroundType, virtualBackgroundImagePath]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className={styles.settingsContainer}>
       {camTrackRef && (
         <VideoTrack
-          style={{
-            maxHeight: '280px',
-            objectFit: 'contain',
-            objectPosition: 'right',
-            transform: 'scaleX(-1)',
-          }}
+          className={styles.videoPreview}
           trackRef={camTrackRef}
         />
       )}
@@ -82,90 +79,47 @@ export function CameraSettings() {
         </div>
       </section>
 
-      <div style={{ marginTop: '10px' }}>
-        <div style={{ marginBottom: '8px' }}>Background Effects</div>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div className={styles.effectsSection}>
+        <div className={styles.effectsTitle}>Background Effects</div>
+        <div className={styles.effectsGrid}>
           <button
             onClick={() => selectBackground('none')}
-            className="lk-button"
+            className={`${styles.effectButton} lk-button ${
+              backgroundType === 'none' ? styles.effectButtonActive : ''
+            }`}
             aria-pressed={backgroundType === 'none'}
-            style={{
-              border: backgroundType === 'none' ? '2px solid #0090ff' : '1px solid #d1d1d1',
-              minWidth: '80px',
-            }}
           >
             None
           </button>
 
           <button
             onClick={() => selectBackground('blur')}
-            className="lk-button"
+            className={`${styles.effectButton} ${styles.blurButton} lk-button ${
+              backgroundType === 'blur' ? styles.effectButtonActive : ''
+            }`}
             aria-pressed={backgroundType === 'blur'}
-            style={{
-              border: backgroundType === 'blur' ? '2px solid #0090ff' : '1px solid #d1d1d1',
-              minWidth: '80px',
-              backgroundColor: '#f0f0f0',
-              position: 'relative',
-              overflow: 'hidden',
-              height: '60px',
-            }}
           >
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: '#e0e0e0',
-                filter: 'blur(8px)',
-                zIndex: 0,
-              }}
-            />
-            <span
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                backgroundColor: 'rgba(0,0,0,0.6)',
-                padding: '2px 5px',
-                borderRadius: '4px',
-                fontSize: '12px',
-              }}
-            >
-              Blur
-            </span>
+            <div className={styles.blurOverlay} />
+            <span className={styles.effectLabel}>Blur</span>
           </button>
 
           {BACKGROUND_IMAGES.map((image) => (
             <button
               key={image.path.src}
               onClick={() => selectBackground('image', image.path.src)}
-              className="lk-button"
+              className={`${styles.effectButton} ${styles.imageButton} lk-button ${
+                backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
+                  ? styles.effectButtonActive
+                  : ''
+              }`}
               aria-pressed={
                 backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
               }
               style={{
                 backgroundImage: `url(${image.path.src})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                width: '80px',
-                height: '60px',
-                border:
-                  backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
-                    ? '2px solid #0090ff'
-                    : '1px solid #d1d1d1',
               }}
             >
-              <span
-                style={{
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  padding: '2px 5px',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                }}
-              >
-                {image.name}
-              </span>
+              <span className={styles.effectLabel}>{image.name}</span>
             </button>
           ))}
         </div>

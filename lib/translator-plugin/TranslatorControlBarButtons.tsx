@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ChevronDown, Hand, Lock, Mic, Volume2, X } from 'lucide-react';
-import { LANGUAGES } from '@/translator-plugin (2)/types';
+import { LANGUAGES } from '@/translator-plugin/types';
 import { useTranslator } from './TranslatorProvider';
 
 export default function TranslatorControlBarButtons() {
