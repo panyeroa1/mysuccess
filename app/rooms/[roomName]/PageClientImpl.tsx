@@ -219,7 +219,6 @@ function VideoConferenceComponent(props: {
   }, [lowPowerMode]);
 
   return (
-  return (
     <div className={`lk-room-container ${styles.roomContainer}`}>
       <header className={styles.roomHeader}>
         <h1 className={styles.roomTitle}>

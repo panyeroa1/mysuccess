@@ -592,6 +592,7 @@ Files or modules expected to change:
 - `styles/Home.module.css`
 
 Risks or things to watch out for:
+
 - Avoiding overflow or "lost" content on very small screens.
 - Maintaining glassmorphism visibility on mobile.
 
@@ -666,6 +667,7 @@ Files or modules expected to change:
 - `app/rooms/[roomName]/PageClientImpl.tsx`
 
 Risks or things to watch out for:
+
 - Z-index issues with global blobs behind the video grid.
 - Overriding LiveKit styles too aggressively might hide important UI elements.
 
@@ -744,6 +746,7 @@ Files or modules expected to change:
 - `tasks.md`
 
 Risks or things to watch out for:
+
 - Ensuring style parity when moving to the CSS module.
 
 WORK CHECKLIST
