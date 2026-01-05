@@ -64,6 +64,7 @@
 }
 
 .imageButton {
+  background-image: var(--bg-image);
   background-size: cover;
   background-position: center;
   width: 80px;

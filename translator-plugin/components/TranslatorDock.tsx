@@ -32,7 +32,7 @@ const emotionColors: Record<EmotionType, string> = {
   excited: 'text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.5)]',
 };
 
-import styles from '../../styles/TranslatorDock.module.css';
+import styles from './TranslatorDock.module.css';
 
 const AudioVisualizer: React.FC<{ data: Uint8Array, colorClass?: string }> = ({ data, colorClass = 'bg-white' }) => {
   if (!data || data.length === 0) return null;

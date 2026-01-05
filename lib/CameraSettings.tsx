@@ -116,8 +116,8 @@ export function CameraSettings() {
                 backgroundType === 'image' && virtualBackgroundImagePath === image.path.src
               }
               style={{
-                backgroundImage: `url(${image.path.src})`,
-              }}
+                '--bg-image': `url(${image.path.src})`,
+              } as React.CSSProperties}
             >
               <span className={styles.effectLabel}>{image.name}</span>
             </button>

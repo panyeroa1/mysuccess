@@ -842,6 +842,7 @@ Summary of what actually changed:
 - Fixed Markdown indentation and spacing in artifacts.
 
 Files actually modified:
+
 - `lib/CameraSettings.tsx`
 - `styles/CameraSettings.module.css`
 - `translator-plugin/components/TranslatorDock.tsx`
@@ -849,8 +850,10 @@ Files actually modified:
 - `tasks.md`
 
 How it was tested:
+
 - `npm run build` verification (PASS).
 - Visual verification of code changes.
 
 Test result:
+
 - PASS
