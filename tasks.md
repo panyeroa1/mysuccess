@@ -864,3 +864,45 @@ How it was tested:
 Test result:
 
 - PASS
+
+------------------------------------------------------------
+STANDARD TASK BLOCK
+------------------------------------------------------------
+
+Task ID: T-0013
+Title: Integrate Translator Controls into Navbar
+Status: IN-PROGRESS
+Owner: Miles
+Related repo or service: meet
+Branch: main
+Created: 2026-01-05 12:05
+Last updated: 2026-01-05 12:05
+
+START LOG (fill this before you start coding)
+
+Timestamp: 2026-01-05 12:05
+Current behavior or state:
+- Translator controls are floating in a portal dock.
+- Native microphone button functions independently of the translator speak button.
+
+Plan and scope for this task:
+- Move translator controls into the main bottom Request ControlBar.
+- Consolidate "Speak" button with native mic toggle.
+- Create `CustomControlBar` to handle the layout.
+
+Files or modules expected to change:
+- `lib/translator-plugin/TranslatorControlBarButtons.tsx` (Refactor)
+- `app/custom/CustomControlBar.tsx` (New)
+- `app/custom/VideoConferenceClientImpl.tsx`
+- `app/rooms/[roomName]/PageClientImpl.tsx`
+
+Risks or things to watch out for:
+- Double audio or state desync between native SDK mic state and plugin state.
+- Layout breaking in the control bar.
+
+WORK CHECKLIST
+
+- [ ] Refactor `TranslatorControlBarButtons`
+- [ ] Implement `CustomControlBar`
+- [ ] Integrate into `VideoConference`
+- [ ] Verify styling and functionality

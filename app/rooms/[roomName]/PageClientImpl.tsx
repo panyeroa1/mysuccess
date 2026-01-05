@@ -9,6 +9,7 @@ import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
 import { TranslatorProvider } from '@/lib/translator-plugin/TranslatorProvider';
+import { CustomControlBar } from '@/app/custom/CustomControlBar';
 import TranslatorControlBarPortal from '@/lib/translator-plugin/TranslatorControlBarPortal';
 import TranslatorDockPanel from '@/lib/translator-plugin/TranslatorDockPanel';
 import {
@@ -236,11 +237,18 @@ function VideoConferenceComponent(props: {
           room={room}
         >
           <KeyboardShortcuts />
+        <div className={styles.videoConferenceWrapper}>
           <VideoConference
             chatMessageFormatter={formatChatMessageLinks}
             SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
           />
-          <TranslatorControlBarPortal />
+        </div>
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-[900px] flex justify-center pointer-events-none">
+             <div className="pointer-events-auto">
+               <CustomControlBar />
+             </div>
+          </div>
+          {/* <TranslatorControlBarPortal /> REMOVED */}
           <div className={styles.translatorDockWrapper}>
             <TranslatorDockPanel />
           </div>

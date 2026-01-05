@@ -54,6 +54,9 @@
 @media (max-width: 900px) {
   .translatorDockWrapper {
     bottom: 7rem;
-    width: min(94vw, 860px);
   }
+}
+
+.videoConferenceWrapper :global(.lk-control-bar) {
+  display: none !important;
 }
