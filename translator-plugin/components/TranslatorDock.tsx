@@ -51,7 +51,7 @@ const AudioVisualizer: React.FC<{ data: Uint8Array, colorClass?: string }> = ({ 
           <div
             key={i}
             className={`${styles.visualizerBar} ${colorClass}`}
-            // eslint-disable-next-line react-dom/no-unsafe-inline-style
+            // eslint-disable-next-line
             style={{ 
               '--bar-height': `${height}px`,
               '--bar-opacity': opacity,
