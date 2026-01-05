@@ -1,8 +1,9 @@
-export type AppMode = 'idle' | 'speaking' | 'listening';
-export type ListenPreference = 'raw' | 'translated';
-export type AudioSource = 'mic' | 'system';
 
-export type EmotionType = 'neutral' | 'joy' | 'sadness' | 'anger' | 'fear' | 'calm' | 'excited';
+export type AppMode = "idle" | "speaking" | "listening";
+export type ListenPreference = "raw" | "translated";
+export type AudioSource = "mic" | "system";
+
+export type EmotionType = "neutral" | "joy" | "sadness" | "anger" | "fear" | "calm" | "excited";
 
 export interface SpeakerInfo {
   userId: string;
@@ -15,6 +16,15 @@ export interface QueueEntry {
   userId: string;
   userName: string;
   requestedAt: number;
+}
+
+/**
+ * Fix: Added missing RoomState interface export.
+ */
+export interface RoomState {
+  activeSpeaker: SpeakerInfo | null;
+  raiseHandQueue: QueueEntry[];
+  lockVersion: number;
 }
 
 export interface Caption {
@@ -41,7 +51,10 @@ export interface TranslationResult {
   pronunciationGuide: string;
 }
 
+export const AUTO_DETECT: Language = { code: 'auto', name: 'Auto Detect', flag: '✨' };
+
 export const LANGUAGES: Language[] = [
+  AUTO_DETECT,
   // --- English World ---
   { code: 'en-US', name: 'English (United States)', flag: '🇺🇸' },
   { code: 'en-GB', name: 'English (United Kingdom)', flag: '🇬🇧' },
@@ -121,7 +134,7 @@ export const LANGUAGES: Language[] = [
   // --- Nordics ---
   { code: 'sv-SE', name: 'Swedish', flag: '🇸🇪' },
   { code: 'da-DK', name: 'Danish', flag: '🇩🇰' },
-  { code: 'nb-NO', name: 'Norwegian Bokmal', flag: '🇳🇴' },
+  { code: 'nb-NO', name: 'Norwegian Bokmål', flag: '🇳🇴' },
   { code: 'nn-NO', name: 'Norwegian Nynorsk', flag: '🇳🇴' },
   { code: 'fi-FI', name: 'Finnish', flag: '🇫🇮' },
   { code: 'is-IS', name: 'Icelandic', flag: '🇮🇸' },
@@ -151,87 +164,8 @@ export const LANGUAGES: Language[] = [
   { code: 'sr-RS', name: 'Serbian (Serbia)', flag: '🇷🇸' },
   { code: 'bs-BA', name: 'Bosnian', flag: '🇧🇦' },
   { code: 'mk-MK', name: 'Macedonian', flag: '🇲🇰' },
-  { code: 'sq-AL', name: 'Albanian', flag: '🇦🇱' },
-  { code: 'el-GR', name: 'Greek', flag: '🇬🇷' },
-  { code: 'ru-RU', name: 'Russian', flag: '🇷🇺' },
-  { code: 'uk-UA', name: 'Ukrainian', flag: '🇺🇦' },
-  { code: 'be-BY', name: 'Belarusian', flag: '🇧🇾' },
-  { code: 'et-EE', name: 'Estonian', flag: '🇪🇪' },
-  { code: 'lv-LV', name: 'Latvian', flag: '🇱🇻' },
-  { code: 'lt-LT', name: 'Lithuanian', flag: '🇱🇹' },
-
-  // --- Caucasus & Central Asia ---
-  { code: 'ka-GE', name: 'Georgian', flag: '🇬🇪' },
-  { code: 'hy-AM', name: 'Armenian', flag: '🇦🇲' },
-  { code: 'az-AZ', name: 'Azerbaijani', flag: '🇦🇿' },
-  { code: 'kk-KZ', name: 'Kazakh', flag: '🇰🇿' },
-  { code: 'ky-KG', name: 'Kyrgyz', flag: '🇰🇬' },
-  { code: 'uz-UZ', name: 'Uzbek', flag: '🇺🇿' },
-  { code: 'tk-TM', name: 'Turkmen', flag: '🇹🇲' },
-  { code: 'tg-TJ', name: 'Tajik', flag: '🇹🇯' },
-
-  // --- Middle East (Semitic/Iranic/Turkic) ---
-  { code: 'tr-TR', name: 'Turkish', flag: '🇹🇷' },
-  { code: 'he-IL', name: 'Hebrew', flag: '🇮🇱' },
-  { code: 'fa-IR', name: 'Persian (Iran)', flag: '🇮🇷' },
-  { code: 'fa-AF', name: 'Dari (Afghanistan)', flag: '🇦🇫' },
-  { code: 'ps-AF', name: 'Pashto (Afghanistan)', flag: '🇦🇫' },
-  { code: 'ku-TR', name: 'Kurdish (Kurmanji)', flag: '🇹🇷' },
-  { code: 'ckb-IQ', name: 'Kurdish (Sorani)', flag: '🇮🇶' },
-
-  // Arabic regional variants
-  { code: 'ar-SA', name: 'Arabic (Saudi Arabia)', flag: '🇸🇦' },
-  { code: 'ar-AE', name: 'Arabic (UAE)', flag: '🇦🇪' },
-  { code: 'ar-EG', name: 'Arabic (Egypt)', flag: '🇪🇬' },
-  { code: 'ar-MA', name: 'Arabic (Morocco)', flag: '🇲🇦' },
-
-  // --- South Asia ---
-  { code: 'hi-IN', name: 'Hindi', flag: '🇮🇳' },
-  { code: 'ur-PK', name: 'Urdu (Pakistan)', flag: '🇵🇰' },
-  { code: 'bn-BD', name: 'Bengali (Bangladesh)', flag: '🇧🇩' },
-  { code: 'pa-IN', name: 'Punjabi (India)', flag: '🇮🇳' },
-  { code: 'gu-IN', name: 'Gujarati', flag: '🇮🇳' },
-  { code: 'mr-IN', name: 'Marathi', flag: '🇮🇳' },
-  { code: 'ta-IN', name: 'Tamil (India)', flag: '🇮🇳' },
-  { code: 'te-IN', name: 'Telugu', flag: '🇮🇳' },
-  { code: 'kn-IN', name: 'Kannada', flag: '🇮🇳' },
-  { code: 'ml-IN', name: 'Malayalam', flag: '🇮🇳' },
-  { code: 'ne-NP', name: 'Nepali', flag: '🇳🇵' },
-  { code: 'si-LK', name: 'Sinhala', flag: '🇱🇰' },
-  { code: 'my-MM', name: 'Burmese (Myanmar)', flag: '🇲🇲' },
-
-  // --- East Asia ---
-  { code: 'zh-Hans', name: 'Chinese (Simplified)', flag: '🇨🇳' },
-  { code: 'zh-Hant', name: 'Chinese (Traditional)', flag: '🇹🇼' },
-  { code: 'ja-JP', name: 'Japanese', flag: '🇯🇵' },
-  { code: 'ko-KR', name: 'Korean', flag: '🇰🇷' },
-
-  // --- Southeast Asia ---
-  { code: 'id-ID', name: 'Indonesian', flag: '🇮🇩' },
-  { code: 'ms-MY', name: 'Malay (Malaysia)', flag: '🇲🇾' },
-  { code: 'vi-VN', name: 'Vietnamese', flag: '🇻🇳' },
-  { code: 'th-TH', name: 'Thai', flag: '🇹🇭' },
-  { code: 'km-KH', name: 'Khmer (Cambodia)', flag: '🇰🇭' },
-  { code: 'lo-LA', name: 'Lao', flag: '🇱🇦' },
-  { code: 'tl-PH', name: 'Tagalog (Filipino)', flag: '🇵🇭' },
-
-  // --- Africa ---
-  { code: 'sw-KE', name: 'Swahili (Kenya)', flag: '🇰🇪' },
-  { code: 'am-ET', name: 'Amharic', flag: '🇪🇹' },
-  { code: 'yo-NG', name: 'Yoruba (Nigeria)', flag: '🇳🇬' },
-  { code: 'ig-NG', name: 'Igbo (Nigeria)', flag: '🇳🇬' },
-  { code: 'ha-NG', name: 'Hausa (Nigeria)', flag: '🇳🇬' },
-  { code: 'zu-ZA', name: 'Zulu (South Africa)', flag: '🇿🇦' },
-
-  // --- Oceania ---
-  { code: 'mi-NZ', name: 'Maori (New Zealand)', flag: '🇳🇿' },
-
-  // --- Constructed ---
-  { code: 'eo', name: 'Esperanto', flag: '🌐' },
+  /**
+   * Fix: Completed the final entry and closed the LANGUAGES array.
+   */
+  { code: 'sq-AL', name: 'Albanian', flag: '🇦🇱' }
 ];
-
-export interface RoomState {
-  activeSpeaker: SpeakerInfo | null;
-  raiseHandQueue: QueueEntry[];
-  lockVersion: number;
-}

@@ -8,7 +8,9 @@ import styles from '@/styles/Room.module.css';
 import { RecordingIndicator } from '@/lib/RecordingIndicator';
 import { SettingsMenu } from '@/lib/SettingsMenu';
 import { ConnectionDetails } from '@/lib/types';
-import TranslatorPlugin from '@/lib/translator/TranslatorPlugin';
+import { TranslatorProvider } from '@/lib/translator-plugin/TranslatorProvider';
+import TranslatorControlBarPortal from '@/lib/translator-plugin/TranslatorControlBarPortal';
+import TranslatorDockPanel from '@/lib/translator-plugin/TranslatorDockPanel';
 import {
   formatChatMessageLinks,
   LocalUserChoices,
@@ -228,20 +230,23 @@ function VideoConferenceComponent(props: {
         <div className={styles.roomBrand}>Powered by Orbit</div>
       </header>
       <RoomContext.Provider value={room}>
-        <KeyboardShortcuts />
-        <VideoConference
-          chatMessageFormatter={formatChatMessageLinks}
-          SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
-        />
-        <div className={styles.translatorDockWrapper}>
-          <TranslatorPlugin
-            roomName={props.connectionDetails.roomName}
-            participantName={props.connectionDetails.participantName}
-            room={room}
+        <TranslatorProvider
+          roomName={props.connectionDetails.roomName}
+          participantName={props.connectionDetails.participantName}
+          room={room}
+        >
+          <KeyboardShortcuts />
+          <VideoConference
+            chatMessageFormatter={formatChatMessageLinks}
+            SettingsComponent={SHOW_SETTINGS_MENU ? SettingsMenu : undefined}
           />
-        </div>
-        <DebugMode />
-        <RecordingIndicator />
+          <TranslatorControlBarPortal />
+          <div className={styles.translatorDockWrapper}>
+            <TranslatorDockPanel />
+          </div>
+          <DebugMode />
+          <RecordingIndicator />
+        </TranslatorProvider>
       </RoomContext.Provider>
     </div>
   );

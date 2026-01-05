@@ -1,4 +1,5 @@
-import { RoomState, SpeakerInfo } from './types';
+
+import { RoomState, SpeakerInfo, QueueEntry } from '../types';
 
 const STORAGE_KEY = 'translator_plugin_room_state';
 
@@ -9,19 +10,17 @@ const INITIAL_STATE: RoomState = {
 };
 
 export function getRoomState(): RoomState {
-  if (typeof window === 'undefined') return INITIAL_STATE;
-  const data = window.localStorage.getItem(STORAGE_KEY);
+  const data = localStorage.getItem(STORAGE_KEY);
   return data ? JSON.parse(data) : INITIAL_STATE;
 }
 
 export function updateRoomState(newState: RoomState) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+  // Dispatch event for other tabs
   window.dispatchEvent(new Event('storage'));
 }
 
 export function subscribeToRoomState(callback: (state: RoomState) => void) {
-  if (typeof window === 'undefined') return () => undefined;
   const handler = () => callback(getRoomState());
   window.addEventListener('storage', handler);
   callback(getRoomState());
@@ -52,7 +51,7 @@ export function releaseSpeaker(userId: string) {
   if (state.activeSpeaker?.userId === userId) {
     let nextQueue = [...state.raiseHandQueue];
     let nextSpeaker: SpeakerInfo | null = null;
-
+    
     if (nextQueue.length > 0) {
       const nextInLine = nextQueue.shift()!;
       nextSpeaker = {
@@ -75,7 +74,7 @@ export function releaseSpeaker(userId: string) {
 
 export function raiseHand(userId: string, userName: string) {
   const state = getRoomState();
-  if (state.raiseHandQueue.some((q) => q.userId === userId)) return;
+  if (state.raiseHandQueue.some(q => q.userId === userId)) return;
   if (state.activeSpeaker?.userId === userId) return;
 
   const newState: RoomState = {
@@ -90,7 +89,7 @@ export function lowerHand(userId: string) {
   const state = getRoomState();
   const newState: RoomState = {
     ...state,
-    raiseHandQueue: state.raiseHandQueue.filter((q) => q.userId !== userId),
+    raiseHandQueue: state.raiseHandQueue.filter(q => q.userId !== userId),
     lockVersion: state.lockVersion + 1,
   };
   updateRoomState(newState);

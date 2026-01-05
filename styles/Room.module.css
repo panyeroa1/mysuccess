@@ -40,7 +40,7 @@
 .translatorDockWrapper {
   position: fixed;
   left: 50%;
-  bottom: 5.5rem;
+  bottom: 6rem;
   transform: translateX(-50%);
   width: min(90vw, 860px);
   z-index: 20;
@@ -53,7 +53,7 @@
 
 @media (max-width: 900px) {
   .translatorDockWrapper {
-    bottom: 6.5rem;
+    bottom: 7rem;
     width: min(94vw, 860px);
   }
 }
